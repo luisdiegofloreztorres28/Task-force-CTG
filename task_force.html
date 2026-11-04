@@ -1,0 +1,1196 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>TASK FORCE - AUTECO SEGUIMIENTO Y PASO DIRECTO</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@700&family=Permanent+Marker&family=Kalam:wght@700&display=swap" rel="stylesheet">
+    
+    <!-- Chart.js + Plugin DataLabels -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
+
+    <style>
+        * { -webkit-box-sizing: border-box; box-sizing: border-box; }
+        body { background-color: #334155 !important; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; padding: 10px; color: #0f172a; }
+        
+        .tab-selector { display: flex; gap: 10px; margin-bottom: 10px; max-width: 1450px; margin-left: auto; margin-right: auto; }
+        .tab-btn { flex: 1; padding: 10px; font-family: 'Permanent Marker', cursive; font-size: 16px; border-radius: 8px; border: 2px solid #000; background: #e2e8f0; color: #000; cursor: pointer; text-align: center; box-shadow: 2px 2px 0px #000; transition: all 0.2s; }
+        .tab-btn.active { background: #ffcc00; color: #000; transform: translateY(-2px); box-shadow: 4px 4px 0px #000; }
+
+        .control-card { background: #ffffff !important; border-radius: 8px; padding: 12px 15px; margin-bottom: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
+        .board-container { background: #ffffff !important; border: 6px solid #cbd5e1; border-radius: 12px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.3); padding: 20px; padding-top: 25px; max-width: 1450px; margin: auto; position: relative; background-image: radial-gradient(#e2e8f0 1.5px, transparent 1.5px); background-size: 24px 24px; }
+        
+        .header-section { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; margin-top: 35px; flex-wrap: wrap; gap: 15px; }
+
+        .banner-taskforce { background: #0b0f19; color: #ffffff; font-family: 'Permanent Marker', cursive; font-size: 30px; padding: 6px 20px; border-radius: 18px 25px 20px 22px; border: 3px solid #000; transform: rotate(-1.5deg); box-shadow: 3px 3px 0px #ffcc00; letter-spacing: 1px; }
+        .banner-taskforce span { color: #ffcc00; }
+
+        .banner-seguimiento { background: #0052cc; color: #fff; font-family: 'Permanent Marker', cursive; font-size: 22px; padding: 6px 20px; border-radius: 25px 15px 25px 15px; border: 3px solid #000; transform: rotate(1deg); box-shadow: 3px 3px 0px #0b0f19; }
+        .banner-general { background: #00a86b; color: #fff; font-family: 'Permanent Marker', cursive; font-size: 22px; padding: 6px 20px; border-radius: 25px 15px 25px 15px; border: 3px solid #000; transform: rotate(1deg); box-shadow: 3px 3px 0px #0b0f19; }
+
+        .auteco-svg-logo { height: 48px; width: auto; }
+        
+        .marker-fields-row { display: flex; gap: 12px; margin-bottom: 15px; background: rgba(255,255,255,0.95); padding: 8px 12px; border-radius: 8px; border: 2px dashed #94a3b8; align-items: center; flex-wrap: wrap; }
+        .marker-label-yellow { background: #ffcc00; font-family: 'Kalam', cursive; font-weight: bold; font-size: 15px; padding: 2px 8px; border-radius: 12px 4px 12px 4px; border: 2px solid #000; }
+        .marker-input-text { font-family: 'Caveat', cursive; font-size: 22px; color: #1e3a8a; font-weight: bold; border: none; border-bottom: 2px solid #1e3a8a; background: transparent; outline: none; } 
+        
+        .chart-wrapper { position: relative; height: 430px; width: calc(100% - 40px); background: #ffffff; border: 2px solid #000; padding: 10px; margin-left: 35px; display: block; }
+        .axis-label-y { position: absolute; left: -52px; top: 45%; transform: rotate(-90deg); background: #ffcc00; font-family: 'Kalam', cursive; font-weight: bold; font-size: 14px; padding: 2px 8px; border: 2px solid #000; border-radius: 8px; z-index: 20; white-space: nowrap; }
+
+        .axis-label-x-container { text-align: center; margin-top: 5px; margin-left: 35px; position: relative; }
+        .banner-dias-pill { background: #ffcc00; font-family: 'Permanent Marker', cursive; font-size: 18px; color: #000; padding: 4px 25px; border: 2px solid #000; border-radius: 20px; display: inline-block; box-shadow: 2px 2px 0px #000; }
+
+        .footer-methodology { display: flex; justify-content: space-around; align-items: center; margin-top: 12px; padding-top: 10px; border-top: 2px solid #cbd5e1; flex-wrap: wrap; gap: 8px; }
+        .method-box { text-align: center; font-family: 'Permanent Marker', cursive; font-size: 14px; color: #0b0f19; flex: 1; min-width: 100px; }
+        .method-box i { font-size: 22px; display: block; margin-bottom: 3px; }
+        
+        .btn-defectos-corner { position: absolute; top: 15px; right: 20px; z-index: 100; font-size: 12px; padding: 5px 10px; }
+        .cloud-badge { font-size: 11px; font-weight: bold; padding: 3px 8px; border-radius: 12px; }
+
+        /* TARJETAS DE HISTÓRICOS PASO DIRECTO GENERAL */
+        .historico-card { border: 3px solid #000; border-radius: 12px; background: #fff; padding: 10px 15px; text-align: center; box-shadow: 4px 4px 0px #000; position: relative; min-width: 160px; }
+        .historico-title { font-size: 12px; font-weight: bold; color: #64748b; margin-bottom: 4px; }
+        .historico-val { font-size: 26px; font-weight: 900; }
+        .btn-edit-card { position: absolute; top: 5px; right: 5px; background: none; border: none; color: #d97706; cursor: pointer; font-size: 12px; padding: 2px 5px; }
+
+        .acum-card-general { border: 3px solid #000; border-radius: 12px; background: #e0f2fe; padding: 0; text-align: center; box-shadow: 4px 4px 0px #000; min-width: 200px; overflow: hidden; position: relative; }
+        .acum-card-header { background: #dbeafe; padding: 6px; font-family: 'Permanent Marker', cursive; font-size: 14px; border-bottom: 2px solid #000; color: #1e3a8a; }
+        .acum-card-body { padding: 8px; font-family: 'Caveat', cursive; font-size: 32px; font-weight: bold; color: #0284c7; }
+
+        .ios-input-group { display: flex; align-items: center; width: 100%; flex-wrap: nowrap; }
+        .ios-input-group select { flex: 1 1 auto; width: auto; font-size: 13px; height: 34px; }
+        .ios-input-group .btn { flex: 0 0 auto; height: 34px; width: 34px; padding: 0; display: inline-flex; align-items: center; justify-content: center; }
+
+        .modal-content { background-color: #ffffff !important; color: #0f172a !important; border-radius: 10px !important; }
+    </style>
+</head>
+<body>
+
+    <div class="tab-selector">
+        <div id="tabModelo" class="tab-btn active" onclick="cambiarModoVista('MODELO')">
+            <i class="fa-solid fa-motorcycle me-2"></i>SEGUIMIENTO POR MODELO
+        </div>
+        <div id="tabGeneral" class="tab-btn" onclick="cambiarModoVista('GENERAL')">
+            <i class="fa-solid fa-chart-column me-2"></i>PASO DIRECTO GENERAL
+        </div>
+    </div>
+
+    <div class="container-fluid" style="max-width: 1450px; margin: auto;">
+        <!-- PANEL DE CONTROL SUPERIOR -->
+        <div class="control-card">
+            <div class="row g-2 align-items-center">
+                
+                <!-- Modelo (solo en vista MODELO) -->
+                <div class="col-12 col-sm-6 col-md-3" id="colModeloCtrl">
+                    <label class="form-label fw-bold mb-1" style="font-size:11px;">Modelo:</label>
+                    <div class="ios-input-group input-group-sm">
+                        <select id="selModeloCtrl" class="form-select fw-bold" onchange="cambiarSeleccionGlobal()">
+                            <option value="Raider 125">Raider 125</option>
+                            <option value="NTORQ 125 FI">NTORQ 125 FI</option>
+                            <option value="TVS Dazz 110">TVS Dazz 110</option>
+                            <option value="TRICARGO 200">TRICARGO 200</option>
+                        </select>
+                        <button class="btn btn-outline-primary fw-bold ms-1" onclick="verificarPermisoYEjecutar(crearNuevoModelo)" title="Agregar modelo"><i class="fa-solid fa-plus"></i></button>
+                        <button class="btn btn-outline-warning fw-bold ms-1" onclick="verificarPermisoYEjecutar(editarModeloActual)" title="Editar modelo"><i class="fa-solid fa-pen"></i></button>
+                    </div>
+                </div>
+
+                <!-- Año -->
+                <div class="col-6 col-sm-3 col-md-2">
+                    <label class="form-label fw-bold mb-1" style="font-size:11px;">Año:</label>
+                    <div class="ios-input-group input-group-sm">
+                        <select id="selAnoCtrl" class="form-select fw-bold" onchange="cambiarSeleccionGlobal()">
+                            <option value="2025">2025</option>
+                            <option value="2026" selected>2026</option>
+                            <option value="2027">2027</option>
+                            <option value="2028">2028</option>
+                        </select>
+                        <button class="btn btn-outline-secondary fw-bold ms-1" onclick="verificarPermisoYEjecutar(crearNuevoAno)"><i class="fa-solid fa-plus"></i></button>
+                        <button class="btn btn-outline-warning fw-bold ms-1" onclick="verificarPermisoYEjecutar(editarAnoActual)"><i class="fa-solid fa-pen"></i></button>
+                    </div>
+                </div>
+
+                <!-- Mes -->
+                <div class="col-6 col-sm-3 col-md-2">
+                    <label class="form-label fw-bold mb-1" style="font-size:11px;">Mes:</label>
+                    <select id="selMesCtrl" class="form-select form-select-sm fw-bold" style="height:34px;" onchange="cambiarSeleccionGlobal()">
+                        <option value="Enero">Enero</option><option value="Febrero">Febrero</option><option value="Marzo">Marzo</option><option value="Abril">Abril</option><option value="Mayo">Mayo</option><option value="Junio">Junio</option><option value="Julio">Julio</option><option value="Agosto">Agosto</option><option value="Septiembre">Septiembre</option><option value="Octubre">Octubre</option><option value="Noviembre" selected>Noviembre</option><option value="Diciembre">Diciembre</option>
+                    </select>
+                </div>
+
+                <!-- Meta (solo en vista MODELO) -->
+                <div class="col-6 col-sm-4 col-md-2" id="colMetaCtrl">
+                    <label class="form-label fw-bold mb-1 text-success" style="font-size:11px;">Meta (%):</label>
+                    <div class="ios-input-group input-group-sm">
+                        <input type="number" id="numMetaCtrl" class="form-control fw-bold text-success" min="0" max="100" step="0.5" value="80">
+                        <button class="btn btn-success fw-bold ms-1" onclick="verificarPermisoYEjecutar(guardarMeta)"><i class="fa-solid fa-check"></i></button>
+                    </div>
+                </div>
+
+                <!-- Día y % Paso Directo -->
+                <div class="col-3 col-sm-3 col-md-1">
+                    <label class="form-label fw-bold mb-1" style="font-size:11px;">Día:</label>
+                    <input type="number" id="numDiaCtrl" class="form-control form-control-sm fw-bold text-center px-1" style="height:34px;" min="1" max="31" value="1" onchange="actualizarDiaSeleccionado()">
+                </div>
+                <div class="col-9 col-sm-5 col-md-2">
+                    <label class="form-label fw-bold mb-1" style="font-size:11px;">% Paso Directo:</label>
+                    <input type="number" id="numPctCtrl" class="form-control form-control-sm fw-bold" style="height:34px;" step="0.01" placeholder="Ej: 75.0">
+                </div>
+
+                <!-- Botones de Acción -->
+                <div class="col-12 d-flex gap-1 justify-content-end align-items-center mt-2 flex-wrap pt-1 border-top">
+                    <span id="cloudStatus" class="cloud-badge bg-secondary text-white me-auto"><i class="fa-solid fa-cloud me-1"></i> Conectando...</span>
+                    
+                    <span id="authBadge" class="badge bg-secondary me-1" style="font-size: 10px;"><i class="fa-solid fa-lock me-1"></i> Lectura</span>
+                    <button class="btn btn-outline-secondary btn-sm fw-bold py-1 px-2" style="font-size: 12px;" onclick="solicitarAutorizacion()"><i class="fa-solid fa-key me-1"></i> Autorizarse</button>
+                    
+                    <button class="btn btn-success btn-sm fw-bold py-1 px-2" style="font-size: 12px;" onclick="verificarPermisoYEjecutar(guardarDatoDia)"><i class="fa-solid fa-floppy-disk me-1"></i> Guardar</button>
+                    <button class="btn btn-danger btn-sm fw-bold py-1 px-2" style="font-size: 12px;" onclick="verificarPermisoYEjecutar(borrarDatoDia)"><i class="fa-solid fa-trash-can me-1"></i> Borrar Día</button>
+                    <button id="btnDefectosTop" class="btn btn-warning btn-sm fw-bold py-1 px-2 text-dark" style="font-size: 12px;" onclick="verificarPermisoYEjecutar(abrirModalRegistrarDefectos)"><i class="fa-solid fa-bug me-1"></i> Defectos</button>
+                    <button class="btn btn-outline-danger btn-sm fw-bold py-1 px-2" style="font-size: 12px;" onclick="verificarPermisoYEjecutar(limpiarNodoActual)" title="Borrar mes"><i class="fa-solid fa-eraser"></i></button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PIZARRA DIGITAL TASK FORCE -->
+    <div class="board-container">
+        
+        <button id="btnResumenDefectosTop" class="btn btn-danger fw-bold shadow btn-defectos-corner" onclick="abrirModalResumenMensualDefectos()">
+            <i class="fa-solid fa-list-check me-1"></i> Top Defectos Mensuales
+        </button>
+
+        <div class="header-section">
+            <div class="banner-taskforce">TASK <span>FORCE</span></div>
+            
+            <div class="d-flex align-items-center gap-2">
+                <div id="bannerTituloModo" class="banner-seguimiento">SEGUIMIENTO POR MODELO</div>
+                <div style="background:#fff; border:2px solid #000; border-radius:50%; width:42px; height:42px; display:flex; align-items:center; justify-content:center; box-shadow: 2px 2px 0px #000;">
+                    <i id="iconHeaderBanner" class="fa-solid fa-lightbulb text-warning fs-5"></i>
+                </div>
+            </div>
+            
+            <div class="d-flex align-items-center me-4">
+                <svg class="auteco-svg-logo" viewBox="0 0 340 130" xmlns="http://www.w3.org/2000/svg">
+                    <polygon points="15,65 170,12 325,65" fill="#153e90"/>
+                    <ellipse cx="215" cy="42" rx="42" ry="24" fill="#ffffff" transform="rotate(-15, 215, 42)"/>
+                    <ellipse cx="215" cy="42" rx="28" ry="16" fill="#e31b23" transform="rotate(-15, 215, 42)"/>
+                    <text x="50%" y="118" text-anchor="middle" font-family="'Segoe UI', 'Helvetica', Arial, sans-serif" font-size="64" font-weight="900" font-style="italic" fill="#153e90" letter-spacing="-2">auteco</text>
+                </svg>
+            </div>
+        </div>
+
+        <div class="marker-fields-row">
+            <div class="d-flex align-items-center gap-2">
+                <span class="marker-label-yellow">Fecha:</span>
+                <input type="text" id="txtFechaBoard" class="marker-input-text" value="01 Noviembre" onchange="verificarPermisoYEjecutar(guardarFechaTexto)">
+            </div>
+            
+            <div class="d-flex align-items-center gap-2" id="rowModeloBoard">
+                <span class="marker-label-yellow">Modelo:</span>
+                <input type="text" id="txtModeloBoard" class="marker-input-text" style="width: 180px;" value="Raider 125" readonly>
+            </div>
+
+            <div id="rowAcumuladoModelo" class="d-flex align-items-center gap-2 ms-auto bg-light px-3 py-1 rounded border flex-wrap">
+                <span class="badge bg-dark fw-bold">Acumulado Mes:</span>
+                <span id="txtAcumuladoMes" class="fw-bold fs-5 text-primary">0.00%</span>
+                <span id="txtEstadoMetaBadge" class="badge bg-secondary">Sin datos</span>
+                
+                <button id="btnMesAnterior" class="badge bg-info text-dark fw-bold border-0 py-1 px-2" style="font-size: 11px; cursor: pointer;" onclick="verificarPermisoYEjecutar(editarAcumuladoMesAnterior)" title="Fijar o editar mes anterior">
+                    <span id="txtLabelMesAnt">Mes Ant: --</span>
+                </button>
+            </div>
+
+            <div class="d-flex align-items-center gap-2" id="rowMetaBoard">
+                <span class="marker-label-yellow">Meta:</span>
+                <input type="text" id="txtMetaBoard" class="marker-input-text" style="width: 60px;" value="80%" readonly>
+            </div>
+        </div>
+
+        <!-- ÁREA DE GRÁFICA PRINCIPAL -->
+        <div class="chart-wrapper">
+            <div class="axis-label-y">Porcentaje</div>
+            <canvas id="taskForceCanvas"></canvas>
+        </div>
+
+        <div class="axis-label-x-container">
+            <div class="banner-dias-pill">Días</div>
+        </div>
+
+        <!-- SECCIÓN DE HISTÓRICOS Y ACUMULADO GENERAL -->
+        <div id="sectionGeneralHistoricos" class="d-none mt-4">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                <div class="d-flex gap-3 flex-wrap">
+                    <div class="historico-card">
+                        <button class="btn-edit-card" onclick="verificarPermisoYEjecutar(editarHistoricoGeneral2025)" title="Editar Resultado 2025"><i class="fa-solid fa-pen"></i></button>
+                        <div class="historico-title">Resultado 2025</div>
+                        <div id="valHist2025" class="historico-val text-primary">75%</div>
+                    </div>
+
+                    <div class="historico-card">
+                        <button class="btn-edit-card" onclick="verificarPermisoYEjecutar(editarHistoricoGeneralMesAnt1)" title="Editar Resultado Sep"><i class="fa-solid fa-pen"></i></button>
+                        <div id="lblHistMesAnt1" class="historico-title">Resultado Sep-26</div>
+                        <div id="valHistMesAnt1" class="historico-val text-info">59%</div>
+                    </div>
+
+                    <div class="historico-card">
+                        <button class="btn-edit-card" onclick="verificarPermisoYEjecutar(editarHistoricoGeneralMesAnt2)" title="Editar Resultado Oct"><i class="fa-solid fa-pen"></i></button>
+                        <div id="lblHistMesAnt2" class="historico-title">Resultado Oct-26</div>
+                        <div id="valHistMesAnt2" class="historico-val text-success">63%</div>
+                    </div>
+                </div>
+
+                <div class="acum-card-general">
+                    <button class="btn-edit-card me-1 mt-1" onclick="verificarPermisoYEjecutar(editarAcumuladoGeneralFijo)" title="Editar o Fijar Acumulado General"><i class="fa-solid fa-pen"></i></button>
+                    <div id="lblAcumGenTitulo" class="acum-card-header">ACUM NOVIEMBRE</div>
+                    <div id="valAcumGenVal" class="acum-card-body">0.00%</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer-methodology">
+            <div class="method-box" style="color: #d97706;"><i class="fa-solid fa-eye" style="color: #f59e0b;"></i> VER</div>
+            <div class="method-box" style="color: #1d4ed8;"><i class="fa-solid fa-brain" style="color: #2563eb;"></i> ENTENDER</div>
+            <div class="method-box" style="color: #b45309;"><i class="fa-solid fa-magnifying-glass" style="color: #d97706;"></i> ANALIZAR</div>
+            <div class="method-box" style="color: #15803d;"><i class="fa-solid fa-gears" style="color: #16a34a;"></i> ACTUAR</div>
+            <div class="method-box" style="color: #1d4ed8;"><i class="fa-solid fa-shield-halved" style="color: #2563eb;"></i> PREVENIR</div>
+        </div>
+    </div>
+
+    <!-- MODALES DE DEFECTOS -->
+    <div class="modal fade" id="modalTopDia" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title fw-bold" id="modalTopDiaTitulo"><i class="fa-solid fa-bug me-2"></i> Defectos del Día</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-muted small mb-2" id="modalTopDiaSub"></p>
+                    <table class="table table-striped table-hover align-middle">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>#</th>
+                                <th>Descripción del Defecto</th>
+                                <th class="text-end">Cantidad</th>
+                                <th class="text-center" style="width: 50px;">Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody id="bodyTopDia"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modalRegDefectos" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-warning text-dark">
+                    <h5 class="modal-title fw-bold"><i class="fa-solid fa-plus me-2"></i> Registrar Defecto por Día</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-2">
+                        <label class="form-label fw-bold">Modelo / Año / Mes:</label>
+                        <input type="text" id="regDefInfo" class="form-control fw-bold" readonly>
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label fw-bold">Día del Mes:</label>
+                        <input type="number" id="regDefDia" class="form-control" min="1" max="31" value="1">
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label fw-bold">Descripción del Defecto:</label>
+                        <input type="text" id="regDefNombre" class="form-control" placeholder="Ej: CUB SWITCH CENTRAL CON GAP">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Cantidad / Motos con Defecto:</label>
+                        <input type="number" id="regDefCant" class="form-control" min="1" value="1">
+                    </div>
+                    <button class="btn btn-warning fw-bold w-100 text-dark" onclick="guardarDefecto()"><i class="fa-solid fa-check me-1"></i> Guardar Defecto</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modalResumenMensual" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title fw-bold"><i class="fa-solid fa-chart-pie me-2"></i> Acumulado Mensual de Defectos</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <h6 class="fw-bold text-secondary" id="txtModeloResumenMensual"></h6>
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-hover">
+                            <thead class="table-secondary">
+                                <tr>
+                                    <th>Defecto</th>
+                                    <th class="text-end">Ocurrencias / Total Mes</th>
+                                </tr>
+                            </thead>
+                            <tbody id="bodyResumenMensual"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- FIREBASE NUBE -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
+        import { getFirestore, doc, onSnapshot, setDoc } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDxXpiQdfQLlHetjd_3uPGB1w8_G04hrVs",
+            authDomain: "auteco-task-force.firebaseapp.com",
+            projectId: "auteco-task-force",
+            storageBucket: "auteco-task-force.firebasestorage.app",
+            messagingSenderId: "165937680176",
+            appId: "1:165937680176:web:15319def6043f0f30542f5"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        const defaultAnos = ["2025", "2026", "2027", "2028", "2029", "2030"];
+        const defaultData = {
+            "Raider 125": {
+                "2026": {
+                    "Noviembre": { fechasTexto: "01 Noviembre", meta: 80, dias: {}, defectos: {} }
+                }
+            }
+        };
+
+        const defaultGeneralData = {
+            "2026": {
+                "Noviembre": {
+                    fechasTexto: "01 Noviembre",
+                    dias: { 1: 72.0, 2: 68.5, 3: 74.0 },
+                    res2025: 75,
+                    resMesAnt1: 59,
+                    resMesAnt2: 63,
+                    acumFijo: null
+                }
+            }
+        };
+
+        window.storeData = defaultData;
+        window.storeGeneralData = defaultGeneralData;
+        window.anosGuardados = defaultAnos;
+        window.db = db;
+        window.doc = doc;
+        window.setDoc = setDoc;
+
+        let primeraCarga = true;
+        const docRef = doc(db, "taskforce_app", "main_dashboard");
+        
+        onSnapshot(docRef, (docSnap) => {
+            const cloudBadge = document.getElementById('cloudStatus');
+            if (docSnap.exists()) {
+                const cloudContent = docSnap.data();
+                if(cloudContent.storeData) window.storeData = cloudContent.storeData;
+                if(cloudContent.storeGeneralData) window.storeGeneralData = cloudContent.storeGeneralData;
+                if(cloudContent.anosGuardados) window.anosGuardados = cloudContent.anosGuardados;
+
+                if (cloudBadge) {
+                    cloudBadge.className = "cloud-badge bg-success text-white";
+                    cloudBadge.innerHTML = `<i class="fa-solid fa-cloud me-1"></i> En línea`;
+                }
+            } else {
+                window.sincronizarConNube();
+            }
+
+            window.poblarSelectAnos();
+            window.poblarSelectModelos();
+
+            if (primeraCarga) {
+                primeraCarga = false;
+            }
+
+            window.cargarDatosVista();
+        }, (error) => {
+            console.error("Modo local activo:", error);
+            const cloudBadge = document.getElementById('cloudStatus');
+            if (cloudBadge) {
+                cloudBadge.className = "cloud-badge bg-warning text-dark";
+                cloudBadge.innerHTML = `<i class="fa-solid fa-triangle-exclamation me-1"></i> Modo Local`;
+            }
+        });
+
+        window.sincronizarConNube = async function() {
+            try {
+                let selM = document.getElementById('selModeloCtrl').value;
+                let selA = document.getElementById('selAnoCtrl').value;
+                let selMes = document.getElementById('selMesCtrl').value;
+                let selDia = document.getElementById('numDiaCtrl').value;
+
+                await setDoc(doc(db, "taskforce_app", "main_dashboard"), {
+                    storeData: window.storeData,
+                    storeGeneralData: window.storeGeneralData,
+                    anosGuardados: window.anosGuardados,
+                    seleccionActual: { modelo: selM, ano: selA, mes: selMes, dia: selDia },
+                    ultimaActualizacion: new Date().toISOString()
+                });
+            } catch (e) {
+                console.error("Error de sync:", e);
+            }
+        };
+    </script>
+
+    <!-- LÓGICA GENERAL DE LA APLICACIÓN Y CONFIGURACIÓN DE GRÁFICAS -->
+    <script>
+        Chart.register(ChartDataLabels);
+
+        let usuarioAutorizado = false;
+        const PIN_AUTORIZADO = "2026";
+        window.chartInstance = null;
+        window.modoVistaActual = "MODELO"; 
+
+        const mesesOrden = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+
+        function solicitarAutorizacion() {
+            if (usuarioAutorizado) {
+                if (confirm("¿Deseas cerrar la sesión de permisos?")) {
+                    usuarioAutorizado = false;
+                    actualizarBadgeAuth();
+                    alert("Modo Lectura activado.");
+                }
+                return;
+            }
+
+            let pinIngresado = prompt("🔒 Ingresa la clave de autorización de Calidad:");
+            if (pinIngresado === PIN_AUTORIZADO) {
+                usuarioAutorizado = true;
+                actualizarBadgeAuth();
+                alert("✅ ¡Acceso Autorizado!");
+            } else if (pinIngresado !== null) {
+                alert("❌ Clave incorrecta.");
+            }
+        }
+
+        function actualizarBadgeAuth() {
+            let badge = document.getElementById('authBadge');
+            if (usuarioAutorizado) {
+                badge.className = "badge bg-success me-1";
+                badge.innerHTML = `<i class="fa-solid fa-lock-open me-1"></i> Autorizado`;
+            } else {
+                badge.className = "badge bg-secondary me-1";
+                badge.innerHTML = `<i class="fa-solid fa-lock me-1"></i> Lectura`;
+            }
+        }
+
+        function verificarPermisoYEjecutar(funcionCallback) {
+            if (!usuarioAutorizado) {
+                let pin = prompt("🔒 Acción protegida. Ingresa la clave:");
+                if (pin === PIN_AUTORIZADO) {
+                    usuarioAutorizado = true;
+                    actualizarBadgeAuth();
+                    funcionCallback();
+                } else if (pin !== null) {
+                    alert("❌ Clave incorrecta.");
+                }
+            } else {
+                funcionCallback();
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", function() {
+            poblarSelectAnos();
+            poblarSelectModelos();
+            actualizarBadgeAuth();
+            cargarDatosVista();
+        });
+
+        function cambiarModoVista(nuevoModo) {
+            window.modoVistaActual = nuevoModo;
+            
+            document.getElementById('tabModelo').classList.toggle('active', nuevoModo === 'MODELO');
+            document.getElementById('tabGeneral').classList.toggle('active', nuevoModo === 'GENERAL');
+
+            document.getElementById('colModeloCtrl').classList.toggle('d-none', nuevoModo === 'GENERAL');
+            document.getElementById('colMetaCtrl').classList.toggle('d-none', nuevoModo === 'GENERAL');
+            document.getElementById('btnDefectosTop').classList.toggle('d-none', nuevoModo === 'GENERAL');
+            document.getElementById('btnResumenDefectosTop').classList.toggle('d-none', nuevoModo === 'GENERAL');
+            
+            document.getElementById('rowModeloBoard').classList.toggle('d-none', nuevoModo === 'GENERAL');
+            document.getElementById('rowAcumuladoModelo').classList.toggle('d-none', nuevoModo === 'GENERAL');
+            document.getElementById('rowMetaBoard').classList.toggle('d-none', nuevoModo === 'GENERAL');
+
+            document.getElementById('sectionGeneralHistoricos').classList.toggle('d-none', nuevoModo === 'MODELO');
+
+            let banner = document.getElementById('bannerTituloModo');
+            let icon = document.getElementById('iconHeaderBanner');
+
+            if (nuevoModo === 'GENERAL') {
+                banner.className = "banner-general";
+                let mes = document.getElementById('selMesCtrl').value;
+                banner.innerText = `% PASO DIRECTO ${mes.toUpperCase()}`;
+                icon.className = "fa-solid fa-chart-column text-success fs-5";
+            } else {
+                banner.className = "banner-seguimiento";
+                banner.innerText = "SEGUIMIENTO POR MODELO";
+                icon.className = "fa-solid fa-lightbulb text-warning fs-5";
+            }
+
+            cargarDatosVista();
+        }
+
+        function poblarSelectAnos() {
+            let sel = document.getElementById('selAnoCtrl');
+            if(!sel) return;
+            let actualVal = sel.value;
+            sel.innerHTML = "";
+            (window.anosGuardados || ["2025", "2026", "2027", "2028"]).forEach(a => {
+                sel.innerHTML += `<option value="${a}">${a}</option>`;
+            });
+            if (actualVal && window.anosGuardados.includes(actualVal)) sel.value = actualVal;
+            else sel.value = "2026";
+        }
+
+        function crearNuevoAno() {
+            let nuevoAno = prompt("Ingresa el nuevo año (ej. 2029):");
+            if(nuevoAno && nuevoAno.trim() !== "") {
+                nuevoAno = nuevoAno.trim();
+                if(!window.anosGuardados.includes(nuevoAno)) {
+                    window.anosGuardados.push(nuevoAno);
+                    window.anosGuardados.sort();
+                    poblarSelectAnos();
+                    document.getElementById('selAnoCtrl').value = nuevoAno;
+                    if(window.sincronizarConNube) window.sincronizarConNube();
+                }
+            }
+        }
+
+        function editarAnoActual() {
+            let selA = document.getElementById('selAnoCtrl');
+            let anoViejo = selA.value;
+            let anoNuevo = prompt("Editar año actual:", anoViejo);
+            if(anoNuevo && anoNuevo.trim() !== "" && anoNuevo !== anoViejo) {
+                anoNuevo = anoNuevo.trim();
+                let index = window.anosGuardados.indexOf(anoViejo);
+                if(index !== -1) {
+                    window.anosGuardados[index] = anoNuevo;
+                    poblarSelectAnos();
+                    selA.value = anoNuevo;
+                    if(window.sincronizarConNube) window.sincronizarConNube();
+                    cargarDatosVista();
+                }
+            }
+        }
+
+        function poblarSelectModelos() {
+            let sel = document.getElementById('selModeloCtrl');
+            if(!sel) return;
+            let actualVal = sel.value;
+            sel.innerHTML = "";
+            let keys = Object.keys(window.storeData || {"Raider 125":{}});
+            keys.forEach(m => sel.innerHTML += `<option value="${m}">${m}</option>`);
+            if (actualVal && keys.includes(actualVal)) sel.value = actualVal;
+            else sel.value = "Raider 125";
+        }
+
+        function crearNuevoModelo() {
+            let nombre = prompt("Nombre del nuevo modelo:");
+            if(nombre && nombre.trim() !== "") {
+                nombre = nombre.trim();
+                if(!window.storeData[nombre]) {
+                    window.storeData[nombre] = {};
+                    poblarSelectModelos();
+                    document.getElementById('selModeloCtrl').value = nombre;
+                    if(window.sincronizarConNube) window.sincronizarConNube();
+                }
+            }
+        }
+
+        function editarModeloActual() {
+            let selM = document.getElementById('selModeloCtrl');
+            let mViejo = selM.value;
+            let mNuevo = prompt("Nuevo nombre para el modelo:", mViejo);
+            if(mNuevo && mNuevo.trim() !== "" && mNuevo !== mViejo) {
+                mNuevo = mNuevo.trim();
+                if(!window.storeData[mNuevo]) {
+                    window.storeData[mNuevo] = window.storeData[mViejo];
+                    delete window.storeData[mViejo];
+                    poblarSelectModelos();
+                    selM.value = mNuevo;
+                    if(window.sincronizarConNube) window.sincronizarConNube();
+                    cargarDatosVista();
+                }
+            }
+        }
+
+        function obtenerNodoModelo() {
+            let m = document.getElementById('selModeloCtrl').value || "Raider 125";
+            let a = document.getElementById('selAnoCtrl').value || "2026";
+            let mes = document.getElementById('selMesCtrl').value || "Noviembre";
+
+            if(!window.storeData[m]) window.storeData[m] = {};
+            if(!window.storeData[m][a]) window.storeData[m][a] = {};
+            if(!window.storeData[m][a][mes]) {
+                let diaCtrl = document.getElementById('numDiaCtrl').value || "1";
+                window.storeData[m][a][mes] = { fechasTexto: `${diaCtrl} ${mes}`, meta: 80, dias: {}, defectos: {}, mesAnteriorFijo: null };
+            }
+            return window.storeData[m][a][mes];
+        }
+
+        function obtenerNodoGeneral() {
+            let a = document.getElementById('selAnoCtrl').value || "2026";
+            let mes = document.getElementById('selMesCtrl').value || "Noviembre";
+
+            if(!window.storeGeneralData) window.storeGeneralData = {};
+            if(!window.storeGeneralData[a]) window.storeGeneralData[a] = {};
+            if(!window.storeGeneralData[a][mes]) {
+                let diaCtrl = document.getElementById('numDiaCtrl').value || "1";
+                window.storeGeneralData[a][mes] = {
+                    fechasTexto: `${diaCtrl} ${mes}`,
+                    dias: {},
+                    res2025: 75,
+                    resMesAnt1: 59,
+                    resMesAnt2: 63,
+                    acumFijo: null
+                };
+            }
+            return window.storeGeneralData[a][mes];
+        }
+
+        function renderizarGrafico(tipoChart, labelsX, datasetPrincipal, datasetMeta) {
+            const canvasEl = document.getElementById('taskForceCanvas');
+            if(!canvasEl) return;
+            const ctx = canvasEl.getContext('2d');
+
+            if(window.chartInstance) window.chartInstance.destroy();
+
+            window.chartInstance = new Chart(ctx, {
+                type: tipoChart, // 'line' o 'bar'
+                data: {
+                    labels: labelsX,
+                    datasets: [
+                        datasetPrincipal,
+                        ...(datasetMeta ? [datasetMeta] : [])
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    layout: { padding: { left: 10, top: 25, right: 10 } },
+                    onClick: (e, elements) => {
+                        if (window.modoVistaActual === 'MODELO') {
+                            if (elements && elements.length > 0) {
+                                let idx = elements[0].index;
+                                if (idx > 0) mostrarTop5DefectosDia(idx);
+                            }
+                        }
+                    },
+                    scales: {
+                        y: { min: 0, max: 100, ticks: { stepSize: 10, callback: v => v + '%' } },
+                        x: { 
+                            ticks: { 
+                                font: { weight: 'bold', size: 11 },
+                                autoSkip: false,
+                                maxRotation: 0,
+                                minRotation: 0
+                            } 
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        datalabels: {
+                            rotation: 0, // SIN INCLINACIÓN (ESTRICTAMENTE HORIZONTAL)
+                            font: { family: 'Caveat', size: 16, weight: 'bold' },
+                            color: '#1e3a8a',
+                            align: function(context) {
+                                if (tipoChart === 'bar') {
+                                    return 'end'; // Sobre la barra en Vista General
+                                }
+                                // En Vista Modelo (Línea), alterna estrictamente arriba / abajo sin inclinar
+                                let idx = context.dataIndex;
+                                return idx % 2 === 0 ? 'top' : 'bottom';
+                            },
+                            anchor: function(context) {
+                                if (tipoChart === 'bar') return 'end';
+                                let idx = context.dataIndex;
+                                return idx % 2 === 0 ? 'end' : 'start';
+                            },
+                            offset: function(context) {
+                                if (tipoChart === 'bar') return 4;
+                                let idx = context.dataIndex;
+                                return idx % 2 === 0 ? 8 : 8;
+                            },
+                            formatter: v => v !== null && v !== undefined ? v + '%' : ''
+                        }
+                    }
+                }
+            });
+        }
+
+        function generarLabelsDiasNumericos() {
+            let labels = ['0'];
+            for(let d = 1; d <= 31; d++) {
+                labels.push(d.toString());
+            }
+            return labels;
+        }
+
+        function calcularAcumuladoVector(mapDias) {
+            if(!mapDias) return 0;
+            let suma = 0, cant = 0;
+            Object.values(mapDias).forEach(v => {
+                if(v !== null && v !== undefined) { suma += parseFloat(v); cant++; }
+            });
+            return cant > 0 ? (suma / cant) : 0;
+        }
+
+        function cargarDatosVista() {
+            let a = document.getElementById('selAnoCtrl').value;
+            let mes = document.getElementById('selMesCtrl').value;
+            let labelsDias = generarLabelsDiasNumericos();
+
+            if (window.modoVistaActual === 'GENERAL') {
+                let banner = document.getElementById('bannerTituloModo');
+                banner.innerText = `% PASO DIRECTO ${mes.toUpperCase()}`;
+                
+                let nodoG = obtenerNodoGeneral();
+                document.getElementById('txtFechaBoard').value = nodoG.fechasTexto || `01 ${mes}`;
+
+                document.getElementById('valHist2025').innerText = (nodoG.res2025 !== undefined ? nodoG.res2025 : 75) + '%';
+                
+                let idxMes = mesesOrden.indexOf(mes);
+                let mesAnt1 = idxMes > 0 ? mesesOrden[idxMes - 1] : "Sep";
+                let mesAnt2 = idxMes > 1 ? mesesOrden[idxMes - 2] : "Oct";
+
+                document.getElementById('lblHistMesAnt1').innerText = `Resultado ${mesAnt2.substring(0,3)}-26`;
+                document.getElementById('valHistMesAnt1').innerText = (nodoG.resMesAnt1 !== undefined ? nodoG.resMesAnt1 : 59) + '%';
+
+                document.getElementById('lblHistMesAnt2').innerText = `Resultado ${mesAnt1.substring(0,3)}-26`;
+                document.getElementById('valHistMesAnt2').innerText = (nodoG.resMesAnt2 !== undefined ? nodoG.resMesAnt2 : 63) + '%';
+
+                document.getElementById('lblAcumGenTitulo').innerText = `ACUM ${mes.toUpperCase()}`;
+                
+                let vectorData = new Array(32).fill(null);
+                let cnt = 0;
+                for(let d = 1; d <= 31; d++) {
+                    if(nodoG.dias && nodoG.dias[d] !== undefined) {
+                        vectorData[d] = nodoG.dias[d];
+                        cnt++;
+                    }
+                }
+
+                let acumCalculado = calcularAcumuladoVector(nodoG.dias);
+                let acumFinal = (nodoG.acumFijo !== null && nodoG.acumFijo !== undefined) ? nodoG.acumFijo : acumCalculado;
+                
+                document.getElementById('valAcumGenVal').innerText = cnt > 0 || nodoG.acumFijo !== null ? acumFinal.toFixed(2) + '%' : '0.00%';
+
+                let datasetBarras = {
+                    type: 'bar',
+                    label: 'Paso Directo (%)',
+                    data: vectorData,
+                    backgroundColor: '#0284c7',
+                    borderColor: '#0369a1',
+                    borderWidth: 1.5,
+                    borderRadius: 4,
+                    barPercentage: 0.7
+                };
+
+                renderizarGrafico('bar', labelsDias, datasetBarras, null);
+
+            } else { // VISTA MODELO
+                let nodoM = obtenerNodoModelo();
+                let m = document.getElementById('selModeloCtrl').value;
+                document.getElementById('txtModeloBoard').value = m;
+                document.getElementById('txtFechaBoard').value = nodoM.fechasTexto || `01 ${mes}`;
+                
+                let metaVal = nodoM.meta !== undefined ? nodoM.meta : 80;
+                document.getElementById('numMetaCtrl').value = metaVal;
+                document.getElementById('txtMetaBoard').value = metaVal + '%';
+
+                let vectorData = new Array(32).fill(null);
+                let cnt = 0;
+                for(let d = 1; d <= 31; d++) {
+                    if(nodoM.dias && nodoM.dias[d] !== undefined) {
+                        vectorData[d] = nodoM.dias[d];
+                        cnt++;
+                    }
+                }
+
+                let acumCalculado = calcularAcumuladoVector(nodoM.dias);
+                document.getElementById('txtAcumuladoMes').innerText = cnt > 0 ? acumCalculado.toFixed(2) + '%' : '0.00%';
+
+                let badgeMeta = document.getElementById('txtEstadoMetaBadge');
+                if (cnt > 0) {
+                    if (acumCalculado >= metaVal) {
+                        badgeMeta.className = "badge bg-success";
+                        badgeMeta.innerText = "Cumpliendo";
+                    } else {
+                        badgeMeta.className = "badge bg-danger";
+                        badgeMeta.innerText = "Bajo Meta";
+                    }
+                } else {
+                    badgeMeta.className = "badge bg-secondary";
+                    badgeMeta.innerText = "Sin datos";
+                }
+
+                let idxMes = mesesOrden.indexOf(mes);
+                let labelMesAnt = document.getElementById('txtLabelMesAnt');
+                if (idxMes > 0) {
+                    let mesAntNombre = mesesOrden[idxMes - 1];
+                    let valAnt = nodoM.mesAnteriorFijo !== null && nodoM.mesAnteriorFijo !== undefined ? nodoM.mesAnteriorFijo : 0;
+                    labelMesAnt.innerText = valAnt > 0 ? `${mesAntNombre.substring(0,3)}: ${valAnt.toFixed(2)}%` : `${mesAntNombre.substring(0,3)}: Sin datos`;
+                } else {
+                    labelMesAnt.innerText = "Mes Ant: N/A";
+                }
+
+                let datasetLinea = {
+                    type: 'line',
+                    label: 'Paso Directo (%)',
+                    data: vectorData,
+                    borderColor: '#2563eb',
+                    borderWidth: 2.5,
+                    pointBackgroundColor: '#000000',
+                    pointBorderColor: '#000000',
+                    pointRadius: 6,
+                    pointHoverRadius: 9,
+                    hitRadius: 15,
+                    tension: 0.1,
+                    spanGaps: true
+                };
+
+                let datasetMeta = {
+                    type: 'line',
+                    label: 'Meta (%)',
+                    data: Array(32).fill(metaVal),
+                    borderColor: '#10b981',
+                    borderWidth: 2,
+                    borderDash: [6, 6],
+                    pointRadius: 0,
+                    fill: false,
+                    datalabels: { display: false }
+                };
+
+                renderizarGrafico('line', labelsDias, datasetLinea, datasetMeta);
+            }
+        }
+
+        function cambiarSeleccionGlobal() {
+            if(window.sincronizarConNube) window.sincronizarConNube();
+            cargarDatosVista();
+        }
+
+        function actualizarDiaSeleccionado() {
+            let dia = document.getElementById('numDiaCtrl').value;
+            let mes = document.getElementById('selMesCtrl').value;
+            if(dia) {
+                let nuevaFechaTexto = `${dia} ${mes}`;
+                document.getElementById('txtFechaBoard').value = nuevaFechaTexto;
+            }
+        }
+
+        function guardarDatoDia() {
+            let dia = parseInt(document.getElementById('numDiaCtrl').value);
+            let pctVal = document.getElementById('numPctCtrl').value.trim();
+
+            if(isNaN(dia) || dia < 1 || dia > 31) return alert("Día inválido.");
+
+            if (window.modoVistaActual === 'GENERAL') {
+                let nodoG = obtenerNodoGeneral();
+                if(pctVal === "") {
+                    delete nodoG.dias[dia];
+                } else {
+                    let num = parseFloat(pctVal);
+                    if(isNaN(num) || num < 0 || num > 100) return alert("Porcentaje inválido.");
+                    nodoG.dias[dia] = num;
+                }
+            } else {
+                let nodoM = obtenerNodoModelo();
+                if(pctVal === "") {
+                    delete nodoM.dias[dia];
+                    if(nodoM.defectos && nodoM.defectos[dia]) delete nodoM.defectos[dia];
+                } else {
+                    let num = parseFloat(pctVal);
+                    if(isNaN(num) || num < 0 || num > 100) return alert("Porcentaje inválido.");
+                    nodoM.dias[dia] = num;
+                }
+            }
+
+            if(window.sincronizarConNube) window.sincronizarConNube();
+            document.getElementById('numPctCtrl').value = "";
+            cargarDatosVista();
+            alert(`✅ Día ${dia} guardado correctamente.`);
+        }
+
+        function borrarDatoDia() {
+            let dia = parseInt(document.getElementById('numDiaCtrl').value);
+            if(isNaN(dia) || dia < 1 || dia > 31) return alert("Día inválido.");
+
+            if (window.modoVistaActual === 'GENERAL') {
+                let nodoG = obtenerNodoGeneral();
+                if(nodoG.dias && nodoG.dias[dia] !== undefined) delete nodoG.dias[dia];
+            } else {
+                let nodoM = obtenerNodoModelo();
+                if(nodoM.dias && nodoM.dias[dia] !== undefined) delete nodoM.dias[dia];
+                if(nodoM.defectos && nodoM.defectos[dia] !== undefined) delete nodoM.defectos[dia];
+            }
+
+            if(window.sincronizarConNube) window.sincronizarConNube();
+            document.getElementById('numPctCtrl').value = "";
+            cargarDatosVista();
+            alert(`🗑️ Datos del día ${dia} borrados.`);
+        }
+
+        function guardarMeta() {
+            let val = parseFloat(document.getElementById('numMetaCtrl').value);
+            if(isNaN(val) || val < 0 || val > 100) return alert("Meta inválida.");
+            let nodoM = obtenerNodoModelo();
+            nodoM.meta = val;
+            if(window.sincronizarConNube) window.sincronizarConNube();
+            cargarDatosVista();
+            alert("✅ Meta actualizada.");
+        }
+
+        function guardarFechaTexto() {
+            let texto = document.getElementById('txtFechaBoard').value;
+            if(window.modoVistaActual === 'GENERAL') {
+                obtenerNodoGeneral().fechasTexto = texto;
+            } else {
+                obtenerNodoModelo().fechasTexto = texto;
+            }
+            if(window.sincronizarConNube) window.sincronizarConNube();
+            alert("✅ Fecha actualizada.");
+        }
+
+        function limpiarNodoActual() {
+            if(confirm("¿Seguro de borrar los datos de este mes?")) {
+                if(window.modoVistaActual === 'GENERAL') {
+                    let nodoG = obtenerNodoGeneral();
+                    nodoG.dias = {};
+                } else {
+                    let nodoM = obtenerNodoModelo();
+                    nodoM.dias = {};
+                    nodoM.defectos = {};
+                }
+                if(window.sincronizarConNube) window.sincronizarConNube();
+                cargarDatosVista();
+            }
+        }
+
+        function editarHistoricoGeneral2025() {
+            let nodoG = obtenerNodoGeneral();
+            let valActual = nodoG.res2025 !== undefined ? nodoG.res2025 : 75;
+            let nuevoVal = prompt("Ingresa el nuevo porcentaje para Resultado 2025:", valActual);
+            if(nuevoVal !== null && nuevoVal.trim() !== "") {
+                let num = parseFloat(nuevoVal);
+                if(!isNaN(num) && num >= 0 && num <= 100) {
+                    nodoG.res2025 = num;
+                    if(window.sincronizarConNube) window.sincronizarConNube();
+                    cargarDatosVista();
+                    alert("✅ Resultado 2025 actualizado.");
+                }
+            }
+        }
+
+        function editarHistoricoGeneralMesAnt1() {
+            let nodoG = obtenerNodoGeneral();
+            let valActual = nodoG.resMesAnt1 !== undefined ? nodoG.resMesAnt1 : 59;
+            let nuevoVal = prompt("Editar valor del mes anterior 1:", valActual);
+            if(nuevoVal !== null && nuevoVal.trim() !== "") {
+                let num = parseFloat(nuevoVal);
+                if(!isNaN(num) && num >= 0 && num <= 100) {
+                    nodoG.resMesAnt1 = num;
+                    if(window.sincronizarConNube) window.sincronizarConNube();
+                    cargarDatosVista();
+                    alert("✅ Valor actualizado.");
+                }
+            }
+        }
+
+        function editarHistoricoGeneralMesAnt2() {
+            let nodoG = obtenerNodoGeneral();
+            let valActual = nodoG.resMesAnt2 !== undefined ? nodoG.resMesAnt2 : 63;
+            let nuevoVal = prompt("Editar valor del mes anterior 2:", valActual);
+            if(nuevoVal !== null && nuevoVal.trim() !== "") {
+                let num = parseFloat(nuevoVal);
+                if(!isNaN(num) && num >= 0 && num <= 100) {
+                    nodoG.resMesAnt2 = num;
+                    if(window.sincronizarConNube) window.sincronizarConNube();
+                    cargarDatosVista();
+                    alert("✅ Valor actualizado.");
+                }
+            }
+        }
+
+        function editarAcumuladoGeneralFijo() {
+            let nodoG = obtenerNodoGeneral();
+            let valActual = nodoG.acumFijo !== null && nodoG.acumFijo !== undefined ? nodoG.acumFijo : "";
+            let nuevoVal = prompt("Fijar o corregir acumulado general del mes (deja vacío para cálculo automático):", valActual);
+            if(nuevoVal !== null) {
+                if(nuevoVal.trim() === "") {
+                    nodoG.acumFijo = null;
+                } else {
+                    let num = parseFloat(nuevoVal);
+                    if(!isNaN(num) && num >= 0 && num <= 100) {
+                        nodoG.acumFijo = num;
+                    }
+                }
+                if(window.sincronizarConNube) window.sincronizarConNube();
+                cargarDatosVista();
+                alert("✅ Acumulado General actualizado.");
+            }
+        }
+
+        function editarAcumuladoMesAnterior() {
+            let nodoM = obtenerNodoModelo();
+            let valActual = nodoM.mesAnteriorFijo !== null && nodoM.mesAnteriorFijo !== undefined ? nodoM.mesAnteriorFijo : "";
+            let nuevoVal = prompt("Fijar porcentaje acumulado del mes anterior para este modelo:", valActual);
+            if(nuevoVal !== null) {
+                if(nuevoVal.trim() === "") nodoM.mesAnteriorFijo = null;
+                else {
+                    let num = parseFloat(nuevoVal);
+                    if(!isNaN(num) && num >= 0 && num <= 100) nodoM.mesAnteriorFijo = num;
+                }
+                if(window.sincronizarConNube) window.sincronizarConNube();
+                cargarDatosVista();
+            }
+        }
+
+        /* DEFECTOS */
+        function abrirModalRegistrarDefectos() {
+            let m = document.getElementById('selModeloCtrl').value;
+            let a = document.getElementById('selAnoCtrl').value;
+            let mes = document.getElementById('selMesCtrl').value;
+
+            document.getElementById('regDefInfo').value = `${m} (${a} - ${mes})`;
+            document.getElementById('regDefDia').value = document.getElementById('numDiaCtrl').value;
+            new bootstrap.Modal(document.getElementById('modalRegDefectos')).show();
+        }
+
+        function guardarDefecto() {
+            let dia = parseInt(document.getElementById('regDefDia').value);
+            let nombre = document.getElementById('regDefNombre').value.trim().toUpperCase();
+            let cant = parseInt(document.getElementById('regDefCant').value);
+
+            if(!nombre || isNaN(cant) || cant <= 0) return alert("Ingresa datos válidos.");
+
+            let nodoM = obtenerNodoModelo();
+            if(!nodoM.defectos) nodoM.defectos = {};
+            if(!nodoM.defectos[dia]) nodoM.defectos[dia] = [];
+
+            nodoM.defectos[dia].push({ nombre, cant });
+            if(window.sincronizarConNube) window.sincronizarConNube();
+
+            document.getElementById('regDefNombre').value = "";
+            bootstrap.Modal.getInstance(document.getElementById('modalRegDefectos')).hide();
+            alert("✅ Defecto registrado.");
+        }
+
+        function eliminarDefectoIndividual(dia, idx) {
+            verificarPermisoYEjecutar(() => {
+                let nodoM = obtenerNodoModelo();
+                if(nodoM.defectos && nodoM.defectos[dia]) {
+                    nodoM.defectos[dia].splice(idx, 1);
+                    if(nodoM.defectos[dia].length === 0) delete nodoM.defectos[dia];
+                    if(window.sincronizarConNube) window.sincronizarConNube();
+                    mostrarTop5DefectosDia(dia);
+                    cargarDatosVista();
+                }
+            });
+        }
+
+        function mostrarTop5DefectosDia(dia) {
+            let m = document.getElementById('selModeloCtrl').value;
+            let a = document.getElementById('selAnoCtrl').value;
+            let mes = document.getElementById('selMesCtrl').value;
+
+            let nodoM = obtenerNodoModelo();
+            let lista = (nodoM.defectos && nodoM.defectos[dia]) ? [...nodoM.defectos[dia]] : [];
+
+            // ORDENAR DE MAYOR A MENOR AUTOMÁTICAMENTE
+            lista.sort((x, y) => parseInt(y.cant) - parseInt(x.cant));
+
+            document.getElementById('modalTopDiaTitulo').innerText = `Defectos - Día ${dia}`;
+            document.getElementById('modalTopDiaSub').innerText = `${m} | ${a} - ${mes}`;
+
+            let body = document.getElementById('bodyTopDia');
+            body.innerHTML = "";
+
+            if(lista.length === 0) {
+                body.innerHTML = `<tr><td colspan="4" class="text-center text-muted">Sin defectos registrados en este día.</td></tr>`;
+            } else {
+                lista.forEach((item, idx) => {
+                    body.innerHTML += `
+                        <tr>
+                            <td>${idx + 1}</td>
+                            <td class="fw-bold">${item.nombre}</td>
+                            <td class="text-end fw-bold text-danger">${item.cant}</td>
+                            <td class="text-center">
+                                <button class="btn btn-outline-danger btn-sm" onclick="eliminarDefectoIndividual(${dia}, ${idx})"><i class="fa-solid fa-trash"></i></button>
+                            </td>
+                        </tr>`;
+                });
+            }
+            
+            let modalEl = document.getElementById('modalTopDia');
+            let instance = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+            instance.show();
+        }
+
+        function abrirModalResumenMensualDefectos() {
+            let m = document.getElementById('selModeloCtrl').value;
+            let a = document.getElementById('selAnoCtrl').value;
+            let mes = document.getElementById('selMesCtrl').value;
+
+            let nodoM = obtenerNodoModelo();
+            let acumuladoDefectos = {};
+
+            if(nodoM.defectos) {
+                Object.keys(nodoM.defectos).forEach(dia => {
+                    let listaDia = nodoM.defectos[dia];
+                    if(Array.isArray(listaDia)) {
+                        listaDia.forEach(item => {
+                            let nombreLimpio = item.nombre.trim().toUpperCase();
+                            if(!acumuladoDefectos[nombreLimpio]) acumuladoDefectos[nombreLimpio] = 0;
+                            acumuladoDefectos[nombreLimpio] += parseInt(item.cant);
+                        });
+                    }
+                });
+            }
+
+            let arrayOrdenado = Object.keys(acumuladoDefectos).map(nombre => {
+                return { nombre, total: acumuladoDefectos[nombre] };
+            }).sort((a, b) => b.total - a.total);
+
+            document.getElementById('txtModeloResumenMensual').innerText = `Modelo: ${m} | Periodo: ${mes} ${a}`;
+            let body = document.getElementById('bodyResumenMensual');
+            body.innerHTML = "";
+
+            if(arrayOrdenado.length === 0) {
+                body.innerHTML = `<tr><td colspan="2" class="text-center text-muted">No hay defectos acumulados en este mes.</td></tr>`;
+            } else {
+                arrayOrdenado.forEach(item => {
+                    body.innerHTML += `
+                        <tr>
+                            <td class="fw-bold">${item.nombre}</td>
+                            <td class="text-end fw-bold text-danger fs-5">${item.total}</td>
+                        </tr>`;
+                });
+            }
+
+            let modalEl = document.getElementById('modalResumenMensual');
+            let instance = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+            instance.show();
+        }
+    </script>
+</body>
+</html>
