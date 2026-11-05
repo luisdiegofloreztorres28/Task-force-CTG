@@ -55,14 +55,15 @@
         .btn-defectos-corner { position: absolute; top: 15px; right: 20px; z-index: 100; font-size: 12px; padding: 5px 10px; }
         .cloud-badge { font-size: 11px; font-weight: bold; padding: 3px 8px; border-radius: 12px; }
 
-        /* TARJETAS DE HISTÓRICOS PASO DIRECTO GENERAL */
-        .historico-card { border: 3px solid #000; border-radius: 12px; background: #fff; padding: 10px 15px; text-align: center; box-shadow: 4px 4px 0px #000; position: relative; min-width: 160px; }
-        .historico-title { font-size: 12px; font-weight: bold; color: #64748b; margin-bottom: 4px; }
+        /* TARJETAS DE HISTÓRICOS PASO DIRECTO GENERAL EDITABLES */
+        .historico-card { border: 3px solid #000; border-radius: 12px; background: #fff; padding: 10px 15px; text-align: center; box-shadow: 4px 4px 0px #000; position: relative; min-width: 170px; }
+        .historico-title { font-size: 13px; font-weight: bold; color: #475569; margin-bottom: 4px; display: flex; align-items: center; justify-content: center; gap: 4px; }
         .historico-val { font-size: 26px; font-weight: 900; }
-        .btn-edit-card { position: absolute; top: 5px; right: 5px; background: none; border: none; color: #d97706; cursor: pointer; font-size: 12px; padding: 2px 5px; }
+        .btn-edit-card { background: none; border: none; color: #d97706; cursor: pointer; font-size: 12px; padding: 2px 4px; }
+        .btn-edit-card:hover { color: #b45309; }
 
-        .acum-card-general { border: 3px solid #000; border-radius: 12px; background: #e0f2fe; padding: 0; text-align: center; box-shadow: 4px 4px 0px #000; min-width: 200px; overflow: hidden; position: relative; }
-        .acum-card-header { background: #dbeafe; padding: 6px; font-family: 'Permanent Marker', cursive; font-size: 14px; border-bottom: 2px solid #000; color: #1e3a8a; }
+        .acum-card-general { border: 3px solid #000; border-radius: 12px; background: #e0f2fe; padding: 0; text-align: center; box-shadow: 4px 4px 0px #000; min-width: 210px; overflow: hidden; position: relative; }
+        .acum-card-header { background: #dbeafe; padding: 6px; font-family: 'Permanent Marker', cursive; font-size: 14px; border-bottom: 2px solid #000; color: #1e3a8a; display: flex; align-items: center; justify-content: center; gap: 4px; }
         .acum-card-body { padding: 8px; font-family: 'Caveat', cursive; font-size: 32px; font-weight: bold; color: #0284c7; }
 
         .ios-input-group { display: flex; align-items: center; width: 100%; flex-wrap: nowrap; }
@@ -112,6 +113,8 @@
                             <option value="2026" selected>2026</option>
                             <option value="2027">2027</option>
                             <option value="2028">2028</option>
+                            <option value="2029">2029</option>
+                            <option value="2030">2030</option>
                         </select>
                         <button class="btn btn-outline-secondary fw-bold ms-1" onclick="verificarPermisoYEjecutar(crearNuevoAno)"><i class="fa-solid fa-plus"></i></button>
                         <button class="btn btn-outline-warning fw-bold ms-1" onclick="verificarPermisoYEjecutar(editarAnoActual)"><i class="fa-solid fa-pen"></i></button>
@@ -229,29 +232,53 @@
         <div id="sectionGeneralHistoricos" class="d-none mt-4">
             <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
                 <div class="d-flex gap-3 flex-wrap">
+                    <!-- Tarjeta Año Anterior -->
                     <div class="historico-card">
-                        <button class="btn-edit-card" onclick="verificarPermisoYEjecutar(editarHistoricoGeneral2025)" title="Editar Resultado 2025"><i class="fa-solid fa-pen"></i></button>
-                        <div class="historico-title">Resultado 2025</div>
-                        <div id="valHist2025" class="historico-val text-primary">75%</div>
+                        <div class="historico-title">
+                            <span id="lblHistAnoAnt">Resultado 2025</span>
+                            <button class="btn-edit-card" onclick="verificarPermisoYEjecutar(editarTituloAnoAnt)" title="Editar texto de tarjeta"><i class="fa-solid fa-pen"></i></button>
+                        </div>
+                        <div class="d-flex align-items-center justify-content-center gap-1">
+                            <div id="valHistAnoAnt" class="historico-val text-primary">75.04%</div>
+                            <button class="btn-edit-card" onclick="verificarPermisoYEjecutar(editarValAnoAnt)" title="Editar porcentaje"><i class="fa-solid fa-pen"></i></button>
+                        </div>
                     </div>
 
+                    <!-- Tarjeta Mes Anterior 2 -->
                     <div class="historico-card">
-                        <button class="btn-edit-card" onclick="verificarPermisoYEjecutar(editarHistoricoGeneralMesAnt1)" title="Editar Resultado Sep"><i class="fa-solid fa-pen"></i></button>
-                        <div id="lblHistMesAnt1" class="historico-title">Resultado Sep-26</div>
-                        <div id="valHistMesAnt1" class="historico-val text-info">59%</div>
+                        <div class="historico-title">
+                            <span id="lblHistMesAnt1">Resultado Sep-26</span>
+                            <button class="btn-edit-card" onclick="verificarPermisoYEjecutar(editarTituloMesAnt1)" title="Editar texto de tarjeta"><i class="fa-solid fa-pen"></i></button>
+                        </div>
+                        <div class="d-flex align-items-center justify-content-center gap-1">
+                            <div id="valHistMesAnt1" class="historico-val text-info">59.6%</div>
+                            <button class="btn-edit-card" onclick="verificarPermisoYEjecutar(editarValMesAnt1)" title="Editar porcentaje"><i class="fa-solid fa-pen"></i></button>
+                        </div>
                     </div>
 
+                    <!-- Tarjeta Mes Anterior 1 -->
                     <div class="historico-card">
-                        <button class="btn-edit-card" onclick="verificarPermisoYEjecutar(editarHistoricoGeneralMesAnt2)" title="Editar Resultado Oct"><i class="fa-solid fa-pen"></i></button>
-                        <div id="lblHistMesAnt2" class="historico-title">Resultado Oct-26</div>
-                        <div id="valHistMesAnt2" class="historico-val text-success">63%</div>
+                        <div class="historico-title">
+                            <span id="lblHistMesAnt2">Resultado Oct-26</span>
+                            <button class="btn-edit-card" onclick="verificarPermisoYEjecutar(editarTituloMesAnt2)" title="Editar texto de tarjeta"><i class="fa-solid fa-pen"></i></button>
+                        </div>
+                        <div class="d-flex align-items-center justify-content-center gap-1">
+                            <div id="valHistMesAnt2" class="historico-val text-success">63%</div>
+                            <button class="btn-edit-card" onclick="verificarPermisoYEjecutar(editarValMesAnt2)" title="Editar porcentaje"><i class="fa-solid fa-pen"></i></button>
+                        </div>
                     </div>
                 </div>
 
+                <!-- Tarjeta Acumulado Mes Actual -->
                 <div class="acum-card-general">
-                    <button class="btn-edit-card me-1 mt-1" onclick="verificarPermisoYEjecutar(editarAcumuladoGeneralFijo)" title="Editar o Fijar Acumulado General"><i class="fa-solid fa-pen"></i></button>
-                    <div id="lblAcumGenTitulo" class="acum-card-header">ACUM NOVIEMBRE</div>
-                    <div id="valAcumGenVal" class="acum-card-body">0.00%</div>
+                    <div class="acum-card-header">
+                        <span id="lblAcumGenTitulo">ACUM NOVIEMBRE</span>
+                        <button class="btn-edit-card ms-1 text-primary" onclick="verificarPermisoYEjecutar(editarTituloAcumGeneral)" title="Editar texto de tarjeta"><i class="fa-solid fa-pen"></i></button>
+                    </div>
+                    <div class="d-flex align-items-center justify-content-center gap-2 px-2 py-1">
+                        <div id="valAcumGenVal" class="acum-card-body">69.50%</div>
+                        <button class="btn-edit-card text-primary fs-6" onclick="verificarPermisoYEjecutar(editarAcumuladoGeneralFijo)" title="Editar o Fijar valor acumulado"><i class="fa-solid fa-pen"></i></button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -380,10 +407,14 @@
                 "Noviembre": {
                     fechasTexto: "01 Noviembre",
                     dias: { 1: 72.0, 2: 68.5, 3: 74.0 },
-                    res2025: 75,
-                    resMesAnt1: 59,
-                    resMesAnt2: 63,
-                    acumFijo: null
+                    resAnoAntVal: "79.04%",
+                    resAnoAntLbl: null,
+                    resMesAnt1Val: "59.6%",
+                    resMesAnt1Lbl: null,
+                    resMesAnt2Val: "63%",
+                    resMesAnt2Lbl: null,
+                    acumFijo: "69.50%",
+                    acumLbl: null
                 }
             }
         };
@@ -554,7 +585,7 @@
             if(!sel) return;
             let actualVal = sel.value;
             sel.innerHTML = "";
-            (window.anosGuardados || ["2025", "2026", "2027", "2028"]).forEach(a => {
+            (window.anosGuardados || ["2025", "2026", "2027", "2028", "2029", "2030"]).forEach(a => {
                 sel.innerHTML += `<option value="${a}">${a}</option>`;
             });
             if (actualVal && window.anosGuardados.includes(actualVal)) sel.value = actualVal;
@@ -658,10 +689,14 @@
                 window.storeGeneralData[a][mes] = {
                     fechasTexto: `${diaCtrl} ${mes}`,
                     dias: {},
-                    res2025: 75,
-                    resMesAnt1: 59,
-                    resMesAnt2: 63,
-                    acumFijo: null
+                    resAnoAntVal: "79.04%",
+                    resAnoAntLbl: null,
+                    resMesAnt1Val: "59.6%",
+                    resMesAnt1Lbl: null,
+                    resMesAnt2Val: "63%",
+                    resMesAnt2Lbl: null,
+                    acumFijo: "69.50%",
+                    acumLbl: null
                 };
             }
             return window.storeGeneralData[a][mes];
@@ -675,7 +710,7 @@
             if(window.chartInstance) window.chartInstance.destroy();
 
             window.chartInstance = new Chart(ctx, {
-                type: tipoChart, // 'line' o 'bar'
+                type: tipoChart,
                 data: {
                     labels: labelsX,
                     datasets: [
@@ -709,14 +744,11 @@
                     plugins: {
                         legend: { display: false },
                         datalabels: {
-                            rotation: 0, // SIN INCLINACIÓN (ESTRICTAMENTE HORIZONTAL)
+                            rotation: 0,
                             font: { family: 'Caveat', size: 16, weight: 'bold' },
                             color: '#1e3a8a',
                             align: function(context) {
-                                if (tipoChart === 'bar') {
-                                    return 'end'; // Sobre la barra en Vista General
-                                }
-                                // En Vista Modelo (Línea), alterna estrictamente arriba / abajo sin inclinar
+                                if (tipoChart === 'bar') return 'end';
                                 let idx = context.dataIndex;
                                 return idx % 2 === 0 ? 'top' : 'bottom';
                             },
@@ -727,8 +759,7 @@
                             },
                             offset: function(context) {
                                 if (tipoChart === 'bar') return 4;
-                                let idx = context.dataIndex;
-                                return idx % 2 === 0 ? 8 : 8;
+                                return 8;
                             },
                             formatter: v => v !== null && v !== undefined ? v + '%' : ''
                         }
@@ -755,7 +786,8 @@
         }
 
         function cargarDatosVista() {
-            let a = document.getElementById('selAnoCtrl').value;
+            let aStr = document.getElementById('selAnoCtrl').value;
+            let aNum = parseInt(aStr);
             let mes = document.getElementById('selMesCtrl').value;
             let labelsDias = generarLabelsDiasNumericos();
 
@@ -766,19 +798,33 @@
                 let nodoG = obtenerNodoGeneral();
                 document.getElementById('txtFechaBoard').value = nodoG.fechasTexto || `01 ${mes}`;
 
-                document.getElementById('valHist2025').innerText = (nodoG.res2025 !== undefined ? nodoG.res2025 : 75) + '%';
-                
+                // --- CALCULO AUTOMÁTICO DE MESES Y AÑOS DINÁMICOS ---
                 let idxMes = mesesOrden.indexOf(mes);
-                let mesAnt1 = idxMes > 0 ? mesesOrden[idxMes - 1] : "Sep";
-                let mesAnt2 = idxMes > 1 ? mesesOrden[idxMes - 2] : "Oct";
+                
+                // Mes 1 Anterior (ej. para Noviembre -> Octubre)
+                let idxAnt1 = idxMes - 1;
+                let anoAnt1 = aNum;
+                if (idxAnt1 < 0) { idxAnt1 = 11; anoAnt1 -= 1; }
+                let mesAnt1Nombre = mesesOrden[idxAnt1].substring(0,3);
 
-                document.getElementById('lblHistMesAnt1').innerText = `Resultado ${mesAnt2.substring(0,3)}-26`;
-                document.getElementById('valHistMesAnt1').innerText = (nodoG.resMesAnt1 !== undefined ? nodoG.resMesAnt1 : 59) + '%';
+                // Mes 2 Anterior (ej. para Noviembre -> Septiembre)
+                let idxAnt2 = idxMes - 2;
+                let anoAnt2 = aNum;
+                if (idxAnt2 < 0) { idxAnt2 += 12; anoAnt2 -= 1; }
+                let mesAnt2Nombre = mesesOrden[idxAnt2].substring(0,3);
 
-                document.getElementById('lblHistMesAnt2').innerText = `Resultado ${mesAnt1.substring(0,3)}-26`;
-                document.getElementById('valHistMesAnt2').innerText = (nodoG.resMesAnt2 !== undefined ? nodoG.resMesAnt2 : 63) + '%';
+                // Títulos automáticos o personalizados
+                let anoPrevio = aNum - 1;
+                document.getElementById('lblHistAnoAnt').innerText = nodoG.resAnoAntLbl || `Resultado ${anoPrevio}`;
+                document.getElementById('valHistAnoAnt').innerText = nodoG.resAnoAntVal || "79.04%";
 
-                document.getElementById('lblAcumGenTitulo').innerText = `ACUM ${mes.toUpperCase()}`;
+                document.getElementById('lblHistMesAnt1').innerText = nodoG.resMesAnt1Lbl || `Resultado ${mesAnt2Nombre}-${anoAnt2.toString().slice(-2)}`;
+                document.getElementById('valHistMesAnt1').innerText = nodoG.resMesAnt1Val || "59.6%";
+
+                document.getElementById('lblHistMesAnt2').innerText = nodoG.resMesAnt2Lbl || `Resultado ${mesAnt1Nombre}-${anoAnt1.toString().slice(-2)}`;
+                document.getElementById('valHistMesAnt2').innerText = nodoG.resMesAnt2Val || "63%";
+
+                document.getElementById('lblAcumGenTitulo').innerText = nodoG.acumLbl || `ACUM ${mes.toUpperCase()}`;
                 
                 let vectorData = new Array(32).fill(null);
                 let cnt = 0;
@@ -790,9 +836,11 @@
                 }
 
                 let acumCalculado = calcularAcumuladoVector(nodoG.dias);
-                let acumFinal = (nodoG.acumFijo !== null && nodoG.acumFijo !== undefined) ? nodoG.acumFijo : acumCalculado;
-                
-                document.getElementById('valAcumGenVal').innerText = cnt > 0 || nodoG.acumFijo !== null ? acumFinal.toFixed(2) + '%' : '0.00%';
+                if (nodoG.acumFijo !== null && nodoG.acumFijo !== undefined) {
+                    document.getElementById('valAcumGenVal').innerText = nodoG.acumFijo;
+                } else {
+                    document.getElementById('valAcumGenVal').innerText = cnt > 0 ? acumCalculado.toFixed(2) + '%' : '0.00%';
+                }
 
                 let datasetBarras = {
                     type: 'bar',
@@ -986,67 +1034,93 @@
             }
         }
 
-        function editarHistoricoGeneral2025() {
+        /* --- FUNCIONES DE EDICIÓN MANUAL DE TARJETAS --- */
+
+        function editarTituloAnoAnt() {
             let nodoG = obtenerNodoGeneral();
-            let valActual = nodoG.res2025 !== undefined ? nodoG.res2025 : 75;
-            let nuevoVal = prompt("Ingresa el nuevo porcentaje para Resultado 2025:", valActual);
-            if(nuevoVal !== null && nuevoVal.trim() !== "") {
-                let num = parseFloat(nuevoVal);
-                if(!isNaN(num) && num >= 0 && num <= 100) {
-                    nodoG.res2025 = num;
-                    if(window.sincronizarConNube) window.sincronizarConNube();
-                    cargarDatosVista();
-                    alert("✅ Resultado 2025 actualizado.");
-                }
+            let actual = document.getElementById('lblHistAnoAnt').innerText;
+            let val = prompt("Modificar título de la tarjeta de año anterior:", actual);
+            if(val !== null) {
+                nodoG.resAnoAntLbl = val.trim() === "" ? null : val.trim();
+                if(window.sincronizarConNube) window.sincronizarConNube();
+                cargarDatosVista();
             }
         }
 
-        function editarHistoricoGeneralMesAnt1() {
+        function editarValAnoAnt() {
             let nodoG = obtenerNodoGeneral();
-            let valActual = nodoG.resMesAnt1 !== undefined ? nodoG.resMesAnt1 : 59;
-            let nuevoVal = prompt("Editar valor del mes anterior 1:", valActual);
-            if(nuevoVal !== null && nuevoVal.trim() !== "") {
-                let num = parseFloat(nuevoVal);
-                if(!isNaN(num) && num >= 0 && num <= 100) {
-                    nodoG.resMesAnt1 = num;
-                    if(window.sincronizarConNube) window.sincronizarConNube();
-                    cargarDatosVista();
-                    alert("✅ Valor actualizado.");
-                }
+            let actual = document.getElementById('valHistAnoAnt').innerText;
+            let val = prompt("Modificar valor de año anterior (ej. 79.04%):", actual);
+            if(val !== null) {
+                nodoG.resAnoAntVal = val.trim();
+                if(window.sincronizarConNube) window.sincronizarConNube();
+                cargarDatosVista();
             }
         }
 
-        function editarHistoricoGeneralMesAnt2() {
+        function editarTituloMesAnt1() {
             let nodoG = obtenerNodoGeneral();
-            let valActual = nodoG.resMesAnt2 !== undefined ? nodoG.resMesAnt2 : 63;
-            let nuevoVal = prompt("Editar valor del mes anterior 2:", valActual);
-            if(nuevoVal !== null && nuevoVal.trim() !== "") {
-                let num = parseFloat(nuevoVal);
-                if(!isNaN(num) && num >= 0 && num <= 100) {
-                    nodoG.resMesAnt2 = num;
-                    if(window.sincronizarConNube) window.sincronizarConNube();
-                    cargarDatosVista();
-                    alert("✅ Valor actualizado.");
-                }
+            let actual = document.getElementById('lblHistMesAnt1').innerText;
+            let val = prompt("Modificar título del primer mes anterior:", actual);
+            if(val !== null) {
+                nodoG.resMesAnt1Lbl = val.trim() === "" ? null : val.trim();
+                if(window.sincronizarConNube) window.sincronizarConNube();
+                cargarDatosVista();
+            }
+        }
+
+        function editarValMesAnt1() {
+            let nodoG = obtenerNodoGeneral();
+            let actual = document.getElementById('valHistMesAnt1').innerText;
+            let val = prompt("Modificar porcentaje del primer mes anterior:", actual);
+            if(val !== null) {
+                nodoG.resMesAnt1Val = val.trim();
+                if(window.sincronizarConNube) window.sincronizarConNube();
+                cargarDatosVista();
+            }
+        }
+
+        function editarTituloMesAnt2() {
+            let nodoG = obtenerNodoGeneral();
+            let actual = document.getElementById('lblHistMesAnt2').innerText;
+            let val = prompt("Modificar título del segundo mes anterior:", actual);
+            if(val !== null) {
+                nodoG.resMesAnt2Lbl = val.trim() === "" ? null : val.trim();
+                if(window.sincronizarConNube) window.sincronizarConNube();
+                cargarDatosVista();
+            }
+        }
+
+        function editarValMesAnt2() {
+            let nodoG = obtenerNodoGeneral();
+            let actual = document.getElementById('valHistMesAnt2').innerText;
+            let val = prompt("Modificar porcentaje del segundo mes anterior:", actual);
+            if(val !== null) {
+                nodoG.resMesAnt2Val = val.trim();
+                if(window.sincronizarConNube) window.sincronizarConNube();
+                cargarDatosVista();
+            }
+        }
+
+        function editarTituloAcumGeneral() {
+            let nodoG = obtenerNodoGeneral();
+            let actual = document.getElementById('lblAcumGenTitulo').innerText;
+            let val = prompt("Modificar título de la tarjeta de Acumulado:", actual);
+            if(val !== null) {
+                nodoG.acumLbl = val.trim() === "" ? null : val.trim();
+                if(window.sincronizarConNube) window.sincronizarConNube();
+                cargarDatosVista();
             }
         }
 
         function editarAcumuladoGeneralFijo() {
             let nodoG = obtenerNodoGeneral();
-            let valActual = nodoG.acumFijo !== null && nodoG.acumFijo !== undefined ? nodoG.acumFijo : "";
-            let nuevoVal = prompt("Fijar o corregir acumulado general del mes (deja vacío para cálculo automático):", valActual);
-            if(nuevoVal !== null) {
-                if(nuevoVal.trim() === "") {
-                    nodoG.acumFijo = null;
-                } else {
-                    let num = parseFloat(nuevoVal);
-                    if(!isNaN(num) && num >= 0 && num <= 100) {
-                        nodoG.acumFijo = num;
-                    }
-                }
+            let actual = document.getElementById('valAcumGenVal').innerText;
+            let val = prompt("Ingresa el porcentaje acumulado (ej: 69.50%):", actual);
+            if(val !== null) {
+                nodoG.acumFijo = val.trim() === "" ? null : val.trim();
                 if(window.sincronizarConNube) window.sincronizarConNube();
                 cargarDatosVista();
-                alert("✅ Acumulado General actualizado.");
             }
         }
 
@@ -1116,7 +1190,6 @@
             let nodoM = obtenerNodoModelo();
             let lista = (nodoM.defectos && nodoM.defectos[dia]) ? [...nodoM.defectos[dia]] : [];
 
-            // ORDENAR DE MAYOR A MENOR AUTOMÁTICAMENTE
             lista.sort((x, y) => parseInt(y.cant) - parseInt(x.cant));
 
             document.getElementById('modalTopDiaTitulo').innerText = `Defectos - Día ${dia}`;
