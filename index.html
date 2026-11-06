@@ -129,7 +129,7 @@
                     </select>
                 </div>
 
-                <!-- Meta (solo en vista MODELO) -->
+                <!-- Meta (Habilitada para Vista Modelo y Vista General) -->
                 <div class="col-6 col-sm-4 col-md-2" id="colMetaCtrl">
                     <label class="form-label fw-bold mb-1 text-success" style="font-size:11px;">Meta (%):</label>
                     <div class="ios-input-group input-group-sm">
@@ -239,7 +239,7 @@
                             <button class="btn-edit-card" onclick="verificarPermisoYEjecutar(editarTituloAnoAnt)" title="Editar texto de tarjeta"><i class="fa-solid fa-pen"></i></button>
                         </div>
                         <div class="d-flex align-items-center justify-content-center gap-1">
-                            <div id="valHistAnoAnt" class="historico-val text-primary">75.04%</div>
+                            <div id="valHistAnoAnt" class="historico-val text-primary">79.04%</div>
                             <button class="btn-edit-card" onclick="verificarPermisoYEjecutar(editarValAnoAnt)" title="Editar porcentaje"><i class="fa-solid fa-pen"></i></button>
                         </div>
                     </div>
@@ -406,6 +406,7 @@
             "2026": {
                 "Noviembre": {
                     fechasTexto: "01 Noviembre",
+                    meta: 80,
                     dias: { 1: 72.0, 2: 68.5, 3: 74.0 },
                     resAnoAntVal: "79.04%",
                     resAnoAntLbl: null,
@@ -553,13 +554,11 @@
             document.getElementById('tabGeneral').classList.toggle('active', nuevoModo === 'GENERAL');
 
             document.getElementById('colModeloCtrl').classList.toggle('d-none', nuevoModo === 'GENERAL');
-            document.getElementById('colMetaCtrl').classList.toggle('d-none', nuevoModo === 'GENERAL');
             document.getElementById('btnDefectosTop').classList.toggle('d-none', nuevoModo === 'GENERAL');
             document.getElementById('btnResumenDefectosTop').classList.toggle('d-none', nuevoModo === 'GENERAL');
             
             document.getElementById('rowModeloBoard').classList.toggle('d-none', nuevoModo === 'GENERAL');
             document.getElementById('rowAcumuladoModelo').classList.toggle('d-none', nuevoModo === 'GENERAL');
-            document.getElementById('rowMetaBoard').classList.toggle('d-none', nuevoModo === 'GENERAL');
 
             document.getElementById('sectionGeneralHistoricos').classList.toggle('d-none', nuevoModo === 'MODELO');
 
@@ -688,6 +687,7 @@
                 let diaCtrl = document.getElementById('numDiaCtrl').value || "1";
                 window.storeGeneralData[a][mes] = {
                     fechasTexto: `${diaCtrl} ${mes}`,
+                    meta: 80,
                     dias: {},
                     resAnoAntVal: "79.04%",
                     resAnoAntLbl: null,
@@ -798,22 +798,24 @@
                 let nodoG = obtenerNodoGeneral();
                 document.getElementById('txtFechaBoard').value = nodoG.fechasTexto || `01 ${mes}`;
 
-                // --- CALCULO AUTOMÁTICO DE MESES Y AÑOS DINÁMICOS ---
+                // Meta General
+                let metaVal = nodoG.meta !== undefined ? nodoG.meta : 80;
+                document.getElementById('numMetaCtrl').value = metaVal;
+                document.getElementById('txtMetaBoard').value = metaVal + '%';
+
+                // Cálculo automático de Meses y Años
                 let idxMes = mesesOrden.indexOf(mes);
                 
-                // Mes 1 Anterior (ej. para Noviembre -> Octubre)
                 let idxAnt1 = idxMes - 1;
                 let anoAnt1 = aNum;
                 if (idxAnt1 < 0) { idxAnt1 = 11; anoAnt1 -= 1; }
                 let mesAnt1Nombre = mesesOrden[idxAnt1].substring(0,3);
 
-                // Mes 2 Anterior (ej. para Noviembre -> Septiembre)
                 let idxAnt2 = idxMes - 2;
                 let anoAnt2 = aNum;
                 if (idxAnt2 < 0) { idxAnt2 += 12; anoAnt2 -= 1; }
                 let mesAnt2Nombre = mesesOrden[idxAnt2].substring(0,3);
 
-                // Títulos automáticos o personalizados
                 let anoPrevio = aNum - 1;
                 document.getElementById('lblHistAnoAnt').innerText = nodoG.resAnoAntLbl || `Resultado ${anoPrevio}`;
                 document.getElementById('valHistAnoAnt').innerText = nodoG.resAnoAntVal || "79.04%";
@@ -853,7 +855,19 @@
                     barPercentage: 0.7
                 };
 
-                renderizarGrafico('bar', labelsDias, datasetBarras, null);
+                let datasetMeta = {
+                    type: 'line',
+                    label: 'Meta (%)',
+                    data: Array(32).fill(metaVal),
+                    borderColor: '#10b981',
+                    borderWidth: 2,
+                    borderDash: [6, 6],
+                    pointRadius: 0,
+                    fill: false,
+                    datalabels: { display: false }
+                };
+
+                renderizarGrafico('bar', labelsDias, datasetBarras, datasetMeta);
 
             } else { // VISTA MODELO
                 let nodoM = obtenerNodoModelo();
@@ -1001,8 +1015,15 @@
         function guardarMeta() {
             let val = parseFloat(document.getElementById('numMetaCtrl').value);
             if(isNaN(val) || val < 0 || val > 100) return alert("Meta inválida.");
-            let nodoM = obtenerNodoModelo();
-            nodoM.meta = val;
+            
+            if (window.modoVistaActual === 'GENERAL') {
+                let nodoG = obtenerNodoGeneral();
+                nodoG.meta = val;
+            } else {
+                let nodoM = obtenerNodoModelo();
+                nodoM.meta = val;
+            }
+
             if(window.sincronizarConNube) window.sincronizarConNube();
             cargarDatosVista();
             alert("✅ Meta actualizada.");
