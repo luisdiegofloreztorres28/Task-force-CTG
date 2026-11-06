@@ -721,7 +721,7 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    layout: { padding: { left: 10, top: 25, right: 10 } },
+                    layout: { padding: { left: 10, top: 40, right: 10 } }, // MÁS MARGEN SUPERIOR PARA EVITAR CORTE DE NÚMEROS
                     onClick: (e, elements) => {
                         if (window.modoVistaActual === 'MODELO') {
                             if (elements && elements.length > 0) {
@@ -744,8 +744,15 @@
                     plugins: {
                         legend: { display: false },
                         datalabels: {
-                            rotation: 0,
-                            font: { family: 'Caveat', size: 16, weight: 'bold' },
+                            // CONFIGURACIÓN PARA EVITAR TRASLAPE DE NÚMEROS
+                            rotation: function(context) {
+                                return tipoChart === 'bar' ? -90 : 0; // ROTACIÓN VERTICAL A -90 GRADOS EN VISTA GENERAL
+                            },
+                            font: function(context) {
+                                return tipoChart === 'bar' 
+                                    ? { family: 'Caveat', size: 13, weight: 'bold' }
+                                    : { family: 'Caveat', size: 16, weight: 'bold' };
+                            },
                             color: '#1e3a8a',
                             align: function(context) {
                                 if (tipoChart === 'bar') return 'end';
@@ -758,8 +765,7 @@
                                 return idx % 2 === 0 ? 'end' : 'start';
                             },
                             offset: function(context) {
-                                if (tipoChart === 'bar') return 4;
-                                return 8;
+                                return tipoChart === 'bar' ? 6 : 8;
                             },
                             formatter: v => v !== null && v !== undefined ? v + '%' : ''
                         }
