@@ -103,12 +103,10 @@
                     <div class="ios-input-group">
                         <select id="selModeloCtrl" class="form-select fw-bold" onchange="cambiarSeleccionGlobal()">
                             <option value="RAIDER 125">RAIDER 125</option>
-                            <option value="NTORQ 125 FI">NTORQ 125 FI</option>
-                            <option value="TVS Dazz 110">TVS Dazz 110</option>
-                            <option value="TRICARGO 200">TRICARGO 200</option>
                         </select>
                         <button class="btn btn-outline-primary fw-bold" onclick="verificarPermisoYEjecutar(crearNuevoModelo)" title="Agregar modelo"><i class="fa-solid fa-plus"></i></button>
                         <button class="btn btn-outline-warning fw-bold" onclick="verificarPermisoYEjecutar(editarModeloActual)" title="Editar modelo"><i class="fa-solid fa-pen"></i></button>
+                        <button class="btn btn-outline-danger fw-bold" onclick="verificarPermisoYEjecutar(eliminarModeloActual)" title="Eliminar modelo actual"><i class="fa-solid fa-trash-can"></i></button>
                     </div>
                 </div>
 
@@ -124,8 +122,9 @@
                             <option value="2029">2029</option>
                             <option value="2030">2030</option>
                         </select>
-                        <button class="btn btn-outline-secondary fw-bold" onclick="verificarPermisoYEjecutar(crearNuevoAno)"><i class="fa-solid fa-plus"></i></button>
-                        <button class="btn btn-outline-warning fw-bold" onclick="verificarPermisoYEjecutar(editarAnoActual)"><i class="fa-solid fa-pen"></i></button>
+                        <button class="btn btn-outline-secondary fw-bold" onclick="verificarPermisoYEjecutar(crearNuevoAno)" title="Agregar año"><i class="fa-solid fa-plus"></i></button>
+                        <button class="btn btn-outline-warning fw-bold" onclick="verificarPermisoYEjecutar(editarAnoActual)" title="Editar año"><i class="fa-solid fa-pen"></i></button>
+                        <button class="btn btn-outline-danger fw-bold" onclick="verificarPermisoYEjecutar(eliminarAnoActual)" title="Eliminar año actual"><i class="fa-solid fa-trash-can"></i></button>
                     </div>
                 </div>
 
@@ -501,7 +500,7 @@
         Chart.register(ChartDataLabels);
 
         let usuarioAutorizado = false;
-        const PIN_AUTORIZADO = "2026";
+        const PIN_AUTORIZADO = "Auteco2026**";
         window.chartInstance = null;
         window.modoVistaActual = "MODELO"; 
 
@@ -560,7 +559,7 @@
             cargarDatosVista();
         });
 
-        /* LECTOR DE EXCEL INTELIGENTE CON LECTURA DIRECTA DE VALORES EXACTOS */
+        /* LECTOR DE EXCEL INTELIGENTE CON RECONOCIMIENTO AUTOMÁTICO DE NUEVOS MODELOS */
         function procesarArchivoExcel(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -571,6 +570,7 @@
                     const data = new Uint8Array(e.target.result);
                     const workbook = XLSX.read(data, { type: 'array', cellDates: true });
                     let totalFilasProcesadas = 0;
+                    let nuevoModeloDetectado = null;
 
                     workbook.SheetNames.forEach(sheetName => {
                         const worksheet = workbook.Sheets[sheetName];
@@ -595,7 +595,11 @@
                             });
                         }
 
-                        if (colFecha === -1) return;
+                        let modeloPestana = sheetName.trim();
+                        let modeloPestanaUpper = modeloPestana.toUpperCase();
+                        if (modeloPestanaUpper.includes("GENERAL") || modeloPestanaUpper.includes("PASO DIRECTO")) {
+                            modeloPestana = "GENERAL";
+                        }
 
                         for (let i = 1; i < jsonData.length; i++) {
                             let row = jsonData[i];
@@ -607,12 +611,10 @@
                             if (!valFecha || String(valFecha).trim() === "") continue;
 
                             let fechaStr = String(valFecha).trim();
-                            let modeloStr = colModelo !== -1 && row[colModelo] ? String(row[colModelo]).trim().toUpperCase() : "GENERAL";
+                            let modeloStr = colModelo !== -1 && row[colModelo] ? String(row[colModelo]).trim() : modeloPestana;
 
-                            if (modeloStr.includes("RAIDER")) modeloStr = "RAIDER 125";
-                            else if (modeloStr.includes("NTORQ")) modeloStr = "NTORQ 125 FI";
-                            else if (modeloStr.includes("DAZZ")) modeloStr = "TVS Dazz 110";
-                            else if (modeloStr.includes("TRICARGO")) modeloStr = "TRICARGO 200";
+                            if (modeloStr === "" || modeloStr.toUpperCase() === "UNDEFINED") modeloStr = modeloPestana;
+                            if (modeloStr.toUpperCase() === "GENERAL") modeloStr = "GENERAL";
 
                             let numEnsambladas = 0;
                             if (colEnsambladas !== -1 && row[colEnsambladas] !== undefined) {
@@ -672,9 +674,12 @@
                                 window.anosGuardados.sort();
                             }
 
-                            // GUARDAR DATOS POR MODELO
-                            if (modeloStr !== "GENERAL") {
-                                if (!window.storeData[modeloStr]) window.storeData[modeloStr] = {};
+                            // GUARDAR DATOS POR MODELO Y CREAR NODO SI NO EXISTE
+                            if (modeloStr.toUpperCase() !== "GENERAL") {
+                                if (!window.storeData[modeloStr]) {
+                                    window.storeData[modeloStr] = {};
+                                    nuevoModeloDetectado = modeloStr;
+                                }
                                 if (!window.storeData[modeloStr][anoStr]) window.storeData[modeloStr][anoStr] = {};
                                 if (!window.storeData[modeloStr][anoStr][mesNombre]) {
                                     window.storeData[modeloStr][anoStr][mesNombre] = { fechasTexto: `01 ${mesNombre}`, meta: 80, diasEnsambladas: {}, diasBuenas: {}, pdDirecto: {}, defectos: {} };
@@ -699,7 +704,7 @@
                             if(!nodoG.diasBuenas) nodoG.diasBuenas = {};
                             if(!nodoG.pdDirecto) nodoG.pdDirecto = {};
 
-                            if (modeloStr === "GENERAL") {
+                            if (modeloStr.toUpperCase() === "GENERAL") {
                                 nodoG.diasEnsambladas[dia] = numEnsambladas;
                                 nodoG.diasBuenas[dia] = numBuenas;
                                 nodoG.pdDirecto[dia] = pdVal;
@@ -715,12 +720,18 @@
 
                     if (totalFilasProcesadas === 0) return alert("No se encontraron registros válidos en el archivo.");
 
+                    // ACTUALIZAR INTERFAZ Y SELECTORES
                     poblarSelectModelos();
                     poblarSelectAnos();
+
+                    if (nuevoModeloDetectado) {
+                        document.getElementById('selModeloCtrl').value = nuevoModeloDetectado;
+                    }
+
                     cargarDatosVista();
 
                     if (window.sincronizarConNube) window.sincronizarConNube();
-                    alert(`✅ ¡Importación Exitosa! Se actualizaron ${totalFilasProcesadas} registros.`);
+                    alert(`✅ ¡Importación Exitosa! Se procesaron ${totalFilasProcesadas} registros correctamente.`);
 
                 } catch (err) {
                     console.error(err);
@@ -806,6 +817,34 @@
             }
         }
 
+        function eliminarAnoActual() {
+            let selA = document.getElementById('selAnoCtrl');
+            let anoActual = selA.value;
+            
+            if (window.anosGuardados.length <= 1) {
+                return alert("⚠️ No puedes eliminar el último año disponible.");
+            }
+
+            if (confirm(`¿Estás seguro de eliminar por completo el año "${anoActual}"?`)) {
+                let index = window.anosGuardados.indexOf(anoActual);
+                if (index !== -1) {
+                    window.anosGuardados.splice(index, 1);
+                }
+                if(window.storeGeneralData && window.storeGeneralData[anoActual]) {
+                    delete window.storeGeneralData[anoActual];
+                }
+                Object.keys(window.storeData || {}).forEach(m => {
+                    if (window.storeData[m][anoActual]) {
+                        delete window.storeData[m][anoActual];
+                    }
+                });
+                poblarSelectAnos();
+                if(window.sincronizarConNube) window.sincronizarConNube();
+                cargarDatosVista();
+                alert(`🗑️ Año "${anoActual}" eliminado correctamente.`);
+            }
+        }
+
         function poblarSelectModelos() {
             let sel = document.getElementById('selModeloCtrl');
             if(!sel) return;
@@ -814,13 +853,13 @@
             let keys = Object.keys(window.storeData || {"RAIDER 125":{}});
             keys.forEach(m => sel.innerHTML += `<option value="${m}">${m}</option>`);
             if (actualVal && keys.includes(actualVal)) sel.value = actualVal;
-            else sel.value = "RAIDER 125";
+            else if (keys.length > 0) sel.value = keys[0];
         }
 
         function crearNuevoModelo() {
             let nombre = prompt("Nombre del nuevo modelo:");
             if(nombre && nombre.trim() !== "") {
-                nombre = nombre.trim().toUpperCase();
+                nombre = nombre.trim();
                 if(!window.storeData[nombre]) {
                     window.storeData[nombre] = {};
                     poblarSelectModelos();
@@ -835,7 +874,7 @@
             let mViejo = selM.value;
             let mNuevo = prompt("Nuevo nombre para el modelo:", mViejo);
             if(mNuevo && mNuevo.trim() !== "" && mNuevo !== mViejo) {
-                mNuevo = mNuevo.trim().toUpperCase();
+                mNuevo = mNuevo.trim();
                 if(!window.storeData[mNuevo]) {
                     window.storeData[mNuevo] = window.storeData[mViejo];
                     delete window.storeData[mViejo];
@@ -844,6 +883,24 @@
                     if(window.sincronizarConNube) window.sincronizarConNube();
                     cargarDatosVista();
                 }
+            }
+        }
+
+        function eliminarModeloActual() {
+            let selM = document.getElementById('selModeloCtrl');
+            let mActual = selM.value;
+            let keys = Object.keys(window.storeData || {});
+            
+            if (keys.length <= 1) {
+                return alert("⚠️ No puedes eliminar el último modelo disponible.");
+            }
+
+            if (confirm(`¿Estás seguro de eliminar por completo el modelo "${mActual}" y todos sus datos?`)) {
+                delete window.storeData[mActual];
+                poblarSelectModelos();
+                if(window.sincronizarConNube) window.sincronizarConNube();
+                cargarDatosVista();
+                alert(`🗑️ Modelo "${mActual}" eliminado correctamente.`);
             }
         }
 
