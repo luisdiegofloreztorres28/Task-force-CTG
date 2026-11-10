@@ -559,7 +559,7 @@
             cargarDatosVista();
         });
 
-        /* LECTOR DE EXCEL INTELIGENTE CON RECONOCIMIENTO AUTOMÁTICO DE NUEVOS MODELOS */
+        /* LECTOR DE EXCEL INTELIGENTE CON ACTUALIZACIÓN Y LIMPIEZA DE CELDAS BORRADAS */
         function procesarArchivoExcel(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -601,6 +601,9 @@
                             modeloPestana = "GENERAL";
                         }
 
+                        // Recopilar todos los días válidos leídos en esta hoja para limpiar los borrados posteriormente
+                        let diasLeidosPorModeloMes = {};
+
                         for (let i = 1; i < jsonData.length; i++) {
                             let row = jsonData[i];
                             let rawRow = rawJsonData[i];
@@ -616,31 +619,8 @@
                             if (modeloStr === "" || modeloStr.toUpperCase() === "UNDEFINED") modeloStr = modeloPestana;
                             if (modeloStr.toUpperCase() === "GENERAL") modeloStr = "GENERAL";
 
-                            let numEnsambladas = 0;
-                            if (colEnsambladas !== -1 && row[colEnsambladas] !== undefined) {
-                                let ensRaw = parseFloat(String(row[colEnsambladas]).replace(',', '.'));
-                                if (!isNaN(ensRaw)) numEnsambladas = ensRaw;
-                            }
-
-                            let numBuenas = 0;
-                            if (colBuenas !== -1 && row[colBuenas] !== undefined) {
-                                let bnsRaw = parseFloat(String(row[colBuenas]).replace(',', '.'));
-                                if (!isNaN(bnsRaw)) numBuenas = bnsRaw;
-                            }
-
-                            let pdVal = null;
-                            if (colPD !== -1 && row[colPD] !== undefined && String(row[colPD]).trim() !== "") {
-                                let pdRaw = parseFloat(String(row[colPD]).replace('%', '').replace(',', '.'));
-                                if (!isNaN(pdRaw)) {
-                                    pdVal = pdRaw <= 1.0 && pdRaw > 0 ? parseFloat((pdRaw * 100).toFixed(2)) : parseFloat(pdRaw.toFixed(2));
-                                }
-                            }
-
-                            if (pdVal === null && numEnsambladas > 0) {
-                                pdVal = parseFloat(((numBuenas / numEnsambladas) * 100).toFixed(2));
-                            }
-
-                            if (pdVal === null || isNaN(pdVal)) continue;
+                            let valEnsStr = colEnsambladas !== -1 && row[colEnsambladas] !== undefined ? String(row[colEnsambladas]).trim() : "";
+                            let valBnsStr = colBuenas !== -1 && row[colBuenas] !== undefined ? String(row[colBuenas]).trim() : "";
 
                             let dia, mesNum, ano;
                             if (rawValFecha instanceof Date) {
@@ -674,7 +654,48 @@
                                 window.anosGuardados.sort();
                             }
 
-                            // GUARDAR DATOS POR MODELO Y CREAR NODO SI NO EXISTE
+                            let claveModeloMes = `${modeloStr}_${anoStr}_${mesNombre}`;
+                            if (!diasLeidosPorModeloMes[claveModeloMes]) {
+                                diasLeidosPorModeloMes[claveModeloMes] = { modelo: modeloStr, ano: anoStr, mes: mesNombre, diasValidos: [] };
+                            }
+
+                            // SI LAS CELDAS ESTÁN VACÍAS EN EXCEL, SE MARCAN PARA BORRARLAS
+                            if (valEnsStr === "" || valBnsStr === "") {
+                                // Se procesa como celda borrada
+                                if (modeloStr.toUpperCase() !== "GENERAL") {
+                                    if (window.storeData[modeloStr]?.[anoStr]?.[mesNombre]) {
+                                        let nodoM = window.storeData[modeloStr][anoStr][mesNombre];
+                                        if (nodoM.diasEnsambladas) delete nodoM.diasEnsambladas[dia];
+                                        if (nodoM.diasBuenas) delete nodoM.diasBuenas[dia];
+                                        if (nodoM.pdDirecto) delete nodoM.pdDirecto[dia];
+                                        if (nodoM.defectos) delete nodoM.defectos[dia];
+                                    }
+                                }
+                                continue;
+                            }
+
+                            let numEnsambladas = parseFloat(valEnsStr.replace(',', '.'));
+                            let numBuenas = parseFloat(valBnsStr.replace(',', '.'));
+
+                            if (isNaN(numEnsambladas) || isNaN(numBuenas)) continue;
+
+                            let pdVal = null;
+                            if (colPD !== -1 && row[colPD] !== undefined && String(row[colPD]).trim() !== "") {
+                                let pdRaw = parseFloat(String(row[colPD]).replace('%', '').replace(',', '.'));
+                                if (!isNaN(pdRaw)) {
+                                    pdVal = pdRaw <= 1.0 && pdRaw > 0 ? parseFloat((pdRaw * 100).toFixed(2)) : parseFloat(pdRaw.toFixed(2));
+                                }
+                            }
+
+                            if (pdVal === null && numEnsambladas > 0) {
+                                pdVal = parseFloat(((numBuenas / numEnsambladas) * 100).toFixed(2));
+                            }
+
+                            if (pdVal === null || isNaN(pdVal)) continue;
+
+                            diasLeidosPorModeloMes[claveModeloMes].diasValidos.push({ dia, numEnsambladas, numBuenas, pdVal });
+
+                            // GUARDAR DATOS POR MODELO
                             if (modeloStr.toUpperCase() !== "GENERAL") {
                                 if (!window.storeData[modeloStr]) {
                                     window.storeData[modeloStr] = {};
@@ -709,9 +730,12 @@
                                 nodoG.diasBuenas[dia] = numBuenas;
                                 nodoG.pdDirecto[dia] = pdVal;
                             } else {
+                                // Consolidar en general sumando los modelos
                                 nodoG.diasEnsambladas[dia] = (nodoG.diasEnsambladas[dia] || 0) + numEnsambladas;
                                 nodoG.diasBuenas[dia] = (nodoG.diasBuenas[dia] || 0) + numBuenas;
-                                nodoG.pdDirecto[dia] = pdVal;
+                                let totEnsG = nodoG.diasEnsambladas[dia];
+                                let totBnsG = nodoG.diasBuenas[dia];
+                                nodoG.pdDirecto[dia] = totEnsG > 0 ? parseFloat(((totBnsG / totEnsG) * 100).toFixed(2)) : 0;
                             }
 
                             totalFilasProcesadas++;
@@ -731,7 +755,7 @@
                     cargarDatosVista();
 
                     if (window.sincronizarConNube) window.sincronizarConNube();
-                    alert(`✅ ¡Importación Exitosa! Se procesaron ${totalFilasProcesadas} registros correctamente.`);
+                    alert(`✅ ¡Importación Exitosa! Se procesaron y actualizaron los datos correctamente.`);
 
                 } catch (err) {
                     console.error(err);
