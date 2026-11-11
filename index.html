@@ -491,7 +491,7 @@
         };
     </script>
 
-    <!-- LÓGICA 100% MANUAL SIN CÁLCULOS AUTOMÁTICOS NI PONDERADOS -->
+    <!-- LÓGICA 100% MANUAL Y CORREGIDA -->
     <script>
         Chart.register(ChartDataLabels);
 
@@ -664,7 +664,6 @@
                                 window.anosGuardados.sort();
                             }
 
-                            // SI LA CELDA VIENE VACÍA -> BORRAR DATO DE ESE DÍA
                             if (valPDStr === "") {
                                 if (modeloStr.toUpperCase() !== "GENERAL") {
                                     if (window.storeData[modeloStr]?.[anoStr]?.[mesNombre]?.pdDirecto) {
@@ -683,7 +682,6 @@
 
                             let pdVal = pdRaw <= 1.0 && pdRaw > 0 ? parseFloat((pdRaw * 100).toFixed(2)) : parseFloat(pdRaw.toFixed(2));
 
-                            // GUARDAR EL VALOR TAL CUAL EN EL MODELO O EN GENERAL
                             if (modeloStr.toUpperCase() !== "GENERAL") {
                                 if (!window.storeData[modeloStr]) {
                                     window.storeData[modeloStr] = {};
@@ -1504,7 +1502,7 @@
 
             let modalEl = document.getElementById('modalResumenMensual');
             let instance = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
-            modalEl.show();
+            instance.show();
         }
     </script>
 </body>
