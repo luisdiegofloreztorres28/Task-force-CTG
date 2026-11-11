@@ -63,7 +63,7 @@
         .btn-defectos-corner { position: absolute; top: 10px; right: 15px; z-index: 100; font-size: 11px; padding: 4px 8px; }
         .cloud-badge { font-size: 11px; font-weight: bold; padding: 3px 8px; border-radius: 12px; }
 
-        /* TARJETAS DE HISTÓRICOS */
+        /* TARJETAS DE HISTÓRICOS Y ACUMULADOS */
         .historico-card { border: 3px solid #000; border-radius: 12px; background: #fff; padding: 8px 12px; text-align: center; box-shadow: 4px 4px 0px #000; position: relative; flex: 1; min-width: 140px; }
         .historico-title { font-size: 12px; font-weight: bold; color: #475569; margin-bottom: 4px; display: flex; align-items: center; justify-content: center; gap: 4px; }
         .historico-val { font-size: 22px; font-weight: 900; }
@@ -145,18 +145,14 @@
                     </div>
                 </div>
 
-                <!-- Entrada Manual Día -->
+                <!-- Entrada Manual del % Paso Directo Día -->
                 <div class="col-6 col-md-1">
                     <label class="form-label fw-bold mb-1" style="font-size:11px;">Día:</label>
                     <input type="number" id="numDiaCtrl" class="form-control fw-bold text-center" style="height:36px; font-size:13px;" min="1" max="31" value="1" onchange="actualizarDiaSeleccionado()">
                 </div>
-                <div class="col-6 col-md-1">
-                    <label class="form-label fw-bold mb-1 text-primary" style="font-size:10px;">Ensambladas:</label>
-                    <input type="number" id="numRevisadasCtrl" class="form-control fw-bold" style="height:36px; font-size:12px;" min="0" placeholder="481">
-                </div>
-                <div class="col-6 col-md-1">
-                    <label class="form-label fw-bold mb-1 text-success" style="font-size:10px;">Sin Defecto:</label>
-                    <input type="number" id="numBuenasCtrl" class="form-control fw-bold" style="height:36px; font-size:12px;" min="0" placeholder="377">
+                <div class="col-6 col-md-2">
+                    <label class="form-label fw-bold mb-1 text-primary" style="font-size:11px;">% Paso Directo:</label>
+                    <input type="number" id="numPDValCtrl" class="form-control fw-bold text-primary" style="height:36px; font-size:13px;" step="0.01" min="0" max="100" placeholder="Ej: 78.56">
                 </div>
 
                 <!-- Botones de Acción e Importación -->
@@ -219,10 +215,12 @@
 
             <div id="rowAcumuladoModelo" class="d-flex align-items-center gap-2 ms-auto bg-light px-2 py-1 rounded border flex-wrap">
                 <span class="badge bg-dark fw-bold">Acumulado Mes:</span>
-                <span id="txtAcumuladoMes" class="fw-bold fs-6 text-primary">0.00%</span>
-                <span id="txtEstadoMetaBadge" class="badge bg-secondary">Sin datos</span>
+                <span id="txtAcumuladoMes" class="fw-bold fs-6 text-primary">--</span>
+                <button class="btn-edit-card" onclick="verificarPermisoYEjecutar(editarAcumuladoModeloManual)" title="Editar Acumulado del Modelo"><i class="fa-solid fa-pen"></i></button>
+
+                <span id="txtEstadoMetaBadge" class="badge bg-secondary ms-1">Sin datos</span>
                 
-                <button id="btnMesAnterior" class="badge bg-info text-dark fw-bold border-0 py-1 px-2" style="font-size: 10px; cursor: pointer;" onclick="verificarPermisoYEjecutar(editarAcumuladoMesAnterior)" title="Fijar o editar mes anterior">
+                <button id="btnMesAnterior" class="badge bg-info text-dark fw-bold border-0 py-1 px-2 ms-1" style="font-size: 10px; cursor: pointer;" onclick="verificarPermisoYEjecutar(editarAcumuladoMesAnterior)" title="Fijar o editar mes anterior">
                     <span id="txtLabelMesAnt">Mes Ant: --</span>
                 </button>
             </div>
@@ -286,7 +284,7 @@
                             <button class="btn-edit-card ms-1 text-primary" onclick="verificarPermisoYEjecutar(editarTituloAcumGeneral)" title="Editar texto de tarjeta"><i class="fa-solid fa-pen"></i></button>
                         </div>
                         <div class="d-flex align-items-center justify-content-center gap-2 px-2 py-1">
-                            <div id="valAcumGenVal" class="acum-card-body">66,21%</div>
+                            <div id="valAcumGenVal" class="acum-card-body">77,87%</div>
                             <button class="btn-edit-card text-primary fs-6" onclick="verificarPermisoYEjecutar(editarAcumuladoGeneralFijo)" title="Editar o Fijar valor acumulado"><i class="fa-solid fa-pen"></i></button>
                         </div>
                     </div>
@@ -408,7 +406,7 @@
         const defaultData = {
             "RAIDER": {
                 "2026": {
-                    "Noviembre": { fechasTexto: "01 Noviembre", meta: 80, diasEnsambladas: {}, diasBuenas: {}, pdDirecto: {}, defectos: {} }
+                    "Noviembre": { fechasTexto: "01 Noviembre", meta: 80, pdDirecto: {}, defectos: {}, acumFijo: null }
                 }
             }
         };
@@ -418,8 +416,6 @@
                 "Noviembre": {
                     fechasTexto: "01 Noviembre",
                     meta: 80,
-                    diasEnsambladas: {},
-                    diasBuenas: {},
                     pdDirecto: {},
                     resAnoAntVal: "79.04%",
                     resAnoAntLbl: null,
@@ -495,7 +491,7 @@
         };
     </script>
 
-    <!-- LÓGICA DE PROCESAMIENTO Y PARSER EXACTO DE EXCEL -->
+    <!-- LÓGICA 100% MANUAL SIN CÁLCULOS AUTOMÁTICOS NI PONDERADOS -->
     <script>
         Chart.register(ChartDataLabels);
 
@@ -559,7 +555,7 @@
             cargarDatosVista();
         });
 
-        /* LECTOR DE EXCEL REVISADO - GARANTIZA COINCIDENCIA DE ACUMULADO EXACTA */
+        /* LECTOR DE EXCEL MANUAL DIRECTO Y EXACTO */
         function procesarArchivoExcel(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -579,10 +575,9 @@
 
                         if (jsonData.length < 2) return;
 
-                        let colFecha = -1, colModelo = -1, colEnsambladas = -1, colSegundaColumna = -1, colPD = -1;
-                        let esColumnaDefectosMalo = false;
+                        let colFecha = -1, colModelo = -1, colPD = -1;
 
-                        // BUSCAR SI EXISTE CELDA CON EL ACUMULADO FIJO DEL EXCEL (Ej: "PD ACUMULADO NOV" o "ACUMULADO MES DE NOV")
+                        // BUSCAR SI EXISTE CELDA DE ACUMULADO FIJO EN EL EXCEL
                         let acumuladoFijoExcel = null;
                         for (let r = 0; r < jsonData.length; r++) {
                             let row = jsonData[r];
@@ -609,18 +604,7 @@
                                 let text = String(cell).toLowerCase().trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
                                 if (text.includes("fecha") || text.includes("periodo")) colFecha = idx;
                                 if (text.includes("modelo")) colModelo = idx;
-                                if (text.includes("ensamblada")) colEnsambladas = idx;
-                                
-                                // Si dice "motos sin defectos" o "sin defecto" o "buenas" -> son buenas directamente
-                                if (text.includes("sin defecto") || text.includes("sin defectos") || text.includes("buenas")) {
-                                    colSegundaColumna = idx;
-                                    esColumnaDefectosMalo = false;
-                                } else if (text.includes("con defecto") || text.includes("con defectos") || (text.includes("defecto") && !text.includes("sin"))) {
-                                    colSegundaColumna = idx;
-                                    esColumnaDefectosMalo = true;
-                                }
-
-                                if (text.includes("% pd") || text.includes("% paso") || text.includes("paso directo")) colPD = idx;
+                                if (text.includes("% pd") || text.includes("% paso") || text.includes("paso directo") || text.includes("pd")) colPD = idx;
                             });
                         }
 
@@ -646,8 +630,7 @@
                             if (modeloStr === "" || modeloStr.toUpperCase() === "UNDEFINED") modeloStr = modeloPestana;
                             if (modeloStr.toUpperCase() === "GENERAL" || esGeneralSheet) modeloStr = "GENERAL";
 
-                            let valEnsStr = colEnsambladas !== -1 && row[colEnsambladas] !== undefined ? String(row[colEnsambladas]).trim() : "";
-                            let valSegStr = colSegundaColumna !== -1 && row[colSegundaColumna] !== undefined ? String(row[colSegundaColumna]).trim() : "";
+                            let valPDStr = colPD !== -1 && row[colPD] !== undefined ? String(row[colPD]).trim() : "";
 
                             let dia, mesNum, ano;
                             if (rawValFecha instanceof Date) {
@@ -681,49 +664,26 @@
                                 window.anosGuardados.sort();
                             }
 
-                            // LIMPIAR SI ESTÁ VACÍO
-                            if (valEnsStr === "" || valSegStr === "") {
+                            // SI LA CELDA VIENE VACÍA -> BORRAR DATO DE ESE DÍA
+                            if (valPDStr === "") {
                                 if (modeloStr.toUpperCase() !== "GENERAL") {
-                                    if (window.storeData[modeloStr]?.[anoStr]?.[mesNombre]) {
-                                        let nodoM = window.storeData[modeloStr][anoStr][mesNombre];
-                                        if (nodoM.diasEnsambladas) delete nodoM.diasEnsambladas[dia];
-                                        if (nodoM.diasBuenas) delete nodoM.diasBuenas[dia];
-                                        if (nodoM.pdDirecto) delete nodoM.pdDirecto[dia];
+                                    if (window.storeData[modeloStr]?.[anoStr]?.[mesNombre]?.pdDirecto) {
+                                        delete window.storeData[modeloStr][anoStr][mesNombre].pdDirecto[dia];
                                     }
                                 } else {
-                                    if (window.storeGeneralData[anoStr]?.[mesNombre]) {
-                                        let nodoG = window.storeGeneralData[anoStr][mesNombre];
-                                        if (nodoG.diasEnsambladas) delete nodoG.diasEnsambladas[dia];
-                                        if (nodoG.diasBuenas) delete nodoG.diasBuenas[dia];
-                                        if (nodoG.pdDirecto) delete nodoG.pdDirecto[dia];
+                                    if (window.storeGeneralData[anoStr]?.[mesNombre]?.pdDirecto) {
+                                        delete window.storeGeneralData[anoStr][mesNombre].pdDirecto[dia];
                                     }
                                 }
                                 continue;
                             }
 
-                            let numEnsambladas = parseFloat(valEnsStr.replace(',', '.'));
-                            let numSegunda = parseFloat(valSegStr.replace(',', '.'));
+                            let pdRaw = parseFloat(valPDStr.replace('%', '').replace(',', '.'));
+                            if (isNaN(pdRaw)) continue;
 
-                            if (isNaN(numEnsambladas) || isNaN(numSegunda)) continue;
+                            let pdVal = pdRaw <= 1.0 && pdRaw > 0 ? parseFloat((pdRaw * 100).toFixed(2)) : parseFloat(pdRaw.toFixed(2));
 
-                            let numBuenas = esColumnaDefectosMalo ? (numEnsambladas - numSegunda) : numSegunda;
-                            if (numBuenas < 0) numBuenas = 0;
-
-                            let pdVal = null;
-                            if (colPD !== -1 && row[colPD] !== undefined && String(row[colPD]).trim() !== "") {
-                                let pdRaw = parseFloat(String(row[colPD]).replace('%', '').replace(',', '.'));
-                                if (!isNaN(pdRaw)) {
-                                    pdVal = pdRaw <= 1.0 && pdRaw > 0 ? parseFloat((pdRaw * 100).toFixed(2)) : parseFloat(pdRaw.toFixed(2));
-                                }
-                            }
-
-                            if (pdVal === null && numEnsambladas > 0) {
-                                pdVal = parseFloat(((numBuenas / numEnsambladas) * 100).toFixed(2));
-                            }
-
-                            if (pdVal === null || isNaN(pdVal)) continue;
-
-                            // GUARDAR DATOS POR MODELO
+                            // GUARDAR EL VALOR TAL CUAL EN EL MODELO O EN GENERAL
                             if (modeloStr.toUpperCase() !== "GENERAL") {
                                 if (!window.storeData[modeloStr]) {
                                     window.storeData[modeloStr] = {};
@@ -731,45 +691,29 @@
                                 }
                                 if (!window.storeData[modeloStr][anoStr]) window.storeData[modeloStr][anoStr] = {};
                                 if (!window.storeData[modeloStr][anoStr][mesNombre]) {
-                                    window.storeData[modeloStr][anoStr][mesNombre] = { fechasTexto: `01 ${mesNombre}`, meta: 80, diasEnsambladas: {}, diasBuenas: {}, pdDirecto: {}, defectos: {} };
+                                    window.storeData[modeloStr][anoStr][mesNombre] = { fechasTexto: `01 ${mesNombre}`, meta: 80, pdDirecto: {}, defectos: {}, acumFijo: null };
                                 }
                                 let nodoM = window.storeData[modeloStr][anoStr][mesNombre];
-                                if(!nodoM.diasEnsambladas) nodoM.diasEnsambladas = {};
-                                if(!nodoM.diasBuenas) nodoM.diasBuenas = {};
                                 if(!nodoM.pdDirecto) nodoM.pdDirecto = {};
 
-                                nodoM.diasEnsambladas[dia] = numEnsambladas;
-                                nodoM.diasBuenas[dia] = numBuenas;
                                 nodoM.pdDirecto[dia] = pdVal;
 
                                 if (acumuladoFijoExcel !== null) {
                                     nodoM.acumFijo = acumuladoFijoExcel.toFixed(2).replace('.', ',') + '%';
                                 }
-                            }
+                            } else {
+                                if (!window.storeGeneralData[anoStr]) window.storeGeneralData[anoStr] = {};
+                                if (!window.storeGeneralData[anoStr][mesNombre]) {
+                                    window.storeGeneralData[anoStr][mesNombre] = { fechasTexto: `01 ${mesNombre}`, meta: 80, pdDirecto: {}, acumFijo: null };
+                                }
+                                let nodoG = window.storeGeneralData[anoStr][mesNombre];
+                                if(!nodoG.pdDirecto) nodoG.pdDirecto = {};
 
-                            // GUARDAR DATOS EN GENERAL
-                            if (!window.storeGeneralData[anoStr]) window.storeGeneralData[anoStr] = {};
-                            if (!window.storeGeneralData[anoStr][mesNombre]) {
-                                window.storeGeneralData[anoStr][mesNombre] = { fechasTexto: `01 ${mesNombre}`, meta: 80, diasEnsambladas: {}, diasBuenas: {}, pdDirecto: {} };
-                            }
-                            let nodoG = window.storeGeneralData[anoStr][mesNombre];
-                            if(!nodoG.diasEnsambladas) nodoG.diasEnsambladas = {};
-                            if(!nodoG.diasBuenas) nodoG.diasBuenas = {};
-                            if(!nodoG.pdDirecto) nodoG.pdDirecto = {};
-
-                            if (modeloStr.toUpperCase() === "GENERAL") {
-                                nodoG.diasEnsambladas[dia] = numEnsambladas;
-                                nodoG.diasBuenas[dia] = numBuenas;
                                 nodoG.pdDirecto[dia] = pdVal;
+
                                 if (acumuladoFijoExcel !== null) {
                                     nodoG.acumFijo = acumuladoFijoExcel.toFixed(2).replace('.', ',') + '%';
                                 }
-                            } else {
-                                nodoG.diasEnsambladas[dia] = (nodoG.diasEnsambladas[dia] || 0) + numEnsambladas;
-                                nodoG.diasBuenas[dia] = (nodoG.diasBuenas[dia] || 0) + numBuenas;
-                                let totEnsG = nodoG.diasEnsambladas[dia];
-                                let totBnsG = nodoG.diasBuenas[dia];
-                                nodoG.pdDirecto[dia] = totEnsG > 0 ? parseFloat(((totBnsG / totEnsG) * 100).toFixed(2)) : 0;
                             }
 
                             totalFilasProcesadas++;
@@ -788,7 +732,7 @@
                     cargarDatosVista();
 
                     if (window.sincronizarConNube) window.sincronizarConNube();
-                    alert(`✅ ¡Importación Exitosa! Se sincronizaron los datos correctamente.`);
+                    alert(`✅ ¡Importación Exitosa! Registros cargados exactamente.`);
 
                 } catch (err) {
                     console.error(err);
@@ -970,11 +914,9 @@
             if(!window.storeData[m][a]) window.storeData[m][a] = {};
             if(!window.storeData[m][a][mes]) {
                 let diaCtrl = document.getElementById('numDiaCtrl').value || "1";
-                window.storeData[m][a][mes] = { fechasTexto: `${diaCtrl} ${mes}`, meta: 80, diasEnsambladas: {}, diasBuenas: {}, pdDirecto: {}, defectos: {}, mesAnteriorFijo: null };
+                window.storeData[m][a][mes] = { fechasTexto: `${diaCtrl} ${mes}`, meta: 80, pdDirecto: {}, defectos: {}, acumFijo: null, mesAnteriorFijo: null };
             }
             if(!window.storeData[m][a][mes].pdDirecto) window.storeData[m][a][mes].pdDirecto = {};
-            if(!window.storeData[m][a][mes].diasEnsambladas) window.storeData[m][a][mes].diasEnsambladas = {};
-            if(!window.storeData[m][a][mes].diasBuenas) window.storeData[m][a][mes].diasBuenas = {};
             return window.storeData[m][a][mes];
         }
 
@@ -989,8 +931,6 @@
                 window.storeGeneralData[a][mes] = {
                     fechasTexto: `${diaCtrl} ${mes}`,
                     meta: 80,
-                    diasEnsambladas: {},
-                    diasBuenas: {},
                     pdDirecto: {},
                     resAnoAntVal: "79.04%",
                     resAnoAntLbl: null,
@@ -1003,8 +943,6 @@
                 };
             }
             if(!window.storeGeneralData[a][mes].pdDirecto) window.storeGeneralData[a][mes].pdDirecto = {};
-            if(!window.storeGeneralData[a][mes].diasEnsambladas) window.storeGeneralData[a][mes].diasEnsambladas = {};
-            if(!window.storeGeneralData[a][mes].diasBuenas) window.storeGeneralData[a][mes].diasBuenas = {};
             return window.storeGeneralData[a][mes];
         }
 
@@ -1110,21 +1048,14 @@
                 document.getElementById('lblAcumGenTitulo').innerText = nodoG.acumLbl || `ACUM ${mes.toUpperCase()}`;
                 
                 let vectorData = new Array(32).fill(null);
-                let totEns = 0, totBns = 0;
 
                 for(let d = 1; d <= 31; d++) {
                     if(nodoG.pdDirecto && nodoG.pdDirecto[d] !== undefined) {
                         vectorData[d] = nodoG.pdDirecto[d];
                     }
-                    if(nodoG.diasEnsambladas && nodoG.diasEnsambladas[d]) totEns += nodoG.diasEnsambladas[d];
-                    if(nodoG.diasBuenas && nodoG.diasBuenas[d]) totBns += nodoG.diasBuenas[d];
                 }
 
-                if (nodoG.acumFijo !== null && nodoG.acumFijo !== undefined) {
-                    document.getElementById('valAcumGenVal').innerText = nodoG.acumFijo;
-                } else {
-                    document.getElementById('valAcumGenVal').innerText = totEns > 0 ? ((totBns / totEns) * 100).toFixed(2).replace('.', ',') + '%' : "0.00%";
-                }
+                document.getElementById('valAcumGenVal').innerText = nodoG.acumFijo !== null && nodoG.acumFijo !== undefined ? nodoG.acumFijo : "0.00%";
 
                 let datasetBarras = {
                     type: 'bar',
@@ -1162,24 +1093,22 @@
                 document.getElementById('txtMetaBoard').value = metaVal + '%';
 
                 let vectorData = new Array(32).fill(null);
-                let cnt = 0, totEns = 0, totBns = 0;
+                let cnt = 0;
 
                 for(let d = 1; d <= 31; d++) {
                     if(nodoM.pdDirecto && nodoM.pdDirecto[d] !== undefined) {
                         vectorData[d] = nodoM.pdDirecto[d];
                         cnt++;
                     }
-                    if(nodoM.diasEnsambladas && nodoM.diasEnsambladas[d]) totEns += nodoM.diasEnsambladas[d];
-                    if(nodoM.diasBuenas && nodoM.diasBuenas[d]) totBns += nodoM.diasBuenas[d];
                 }
 
-                let acumCalculado = totEns > 0 ? ((totBns / totEns) * 100).toFixed(2).replace('.', ',') + '%' : "0.00%";
-                document.getElementById('txtAcumuladoMes').innerText = nodoM.acumFijo || acumCalculado;
+                let acumStr = nodoM.acumFijo !== null && nodoM.acumFijo !== undefined ? nodoM.acumFijo : "0.00%";
+                document.getElementById('txtAcumuladoMes').innerText = acumStr;
 
-                let acumNum = totEns > 0 ? (totBns / totEns) * 100 : 0;
+                let acumNum = parseFloat(acumStr.replace('%', '').replace(',', '.'));
                 let badgeMeta = document.getElementById('txtEstadoMetaBadge');
-                if (cnt > 0) {
-                    if (acumNum >= metaVal) {
+                if (cnt > 0 || nodoM.acumFijo !== null) {
+                    if (!isNaN(acumNum) && acumNum >= metaVal) {
                         badgeMeta.className = "badge bg-success";
                         badgeMeta.innerText = "Cumpliendo";
                     } else {
@@ -1248,44 +1177,30 @@
 
         function guardarDatoDia() {
             let dia = parseInt(document.getElementById('numDiaCtrl').value);
-            let revisadasVal = document.getElementById('numRevisadasCtrl').value.trim();
-            let buenasVal = document.getElementById('numBuenasCtrl').value.trim();
+            let pdValInput = document.getElementById('numPDValCtrl').value.trim();
 
             if(isNaN(dia) || dia < 1 || dia > 31) return alert("Día inválido.");
 
-            let rev = parseFloat(revisadasVal);
-            let buenas = parseFloat(buenasVal);
+            if (pdValInput === "") {
+                borrarDatoDia();
+                return;
+            }
+
+            let valPD = parseFloat(pdValInput.replace(',', '.'));
+            if(isNaN(valPD) || valPD < 0 || valPD > 100) return alert("Porcentaje inválido.");
 
             if (window.modoVistaActual === 'GENERAL') {
                 let nodoG = obtenerNodoGeneral();
-                if(revisadasVal === "" || buenasVal === "") {
-                    delete nodoG.pdDirecto[dia];
-                    delete nodoG.diasEnsambladas[dia];
-                    delete nodoG.diasBuenas[dia];
-                } else {
-                    nodoG.diasEnsambladas[dia] = rev;
-                    nodoG.diasBuenas[dia] = buenas;
-                    nodoG.pdDirecto[dia] = parseFloat(((buenas / rev) * 100).toFixed(2));
-                }
+                nodoG.pdDirecto[dia] = valPD;
             } else {
                 let nodoM = obtenerNodoModelo();
-                if(revisadasVal === "" || buenasVal === "") {
-                    delete nodoM.pdDirecto[dia];
-                    delete nodoM.diasEnsambladas[dia];
-                    delete nodoM.diasBuenas[dia];
-                    if(nodoM.defectos && nodoM.defectos[dia]) delete nodoM.defectos[dia];
-                } else {
-                    nodoM.diasEnsambladas[dia] = rev;
-                    nodoM.diasBuenas[dia] = buenas;
-                    nodoM.pdDirecto[dia] = parseFloat(((buenas / rev) * 100).toFixed(2));
-                }
+                nodoM.pdDirecto[dia] = valPD;
             }
 
             if(window.sincronizarConNube) window.sincronizarConNube();
-            document.getElementById('numRevisadasCtrl').value = "";
-            document.getElementById('numBuenasCtrl').value = "";
+            document.getElementById('numPDValCtrl').value = "";
             cargarDatosVista();
-            alert(`✅ Datos del día ${dia} guardados correctamente.`);
+            alert(`✅ % Paso Directo del día ${dia} (${valPD}%) guardado correctamente.`);
         }
 
         function borrarDatoDia() {
@@ -1295,19 +1210,14 @@
             if (window.modoVistaActual === 'GENERAL') {
                 let nodoG = obtenerNodoGeneral();
                 if(nodoG.pdDirecto) delete nodoG.pdDirecto[dia];
-                if(nodoG.diasEnsambladas) delete nodoG.diasEnsambladas[dia];
-                if(nodoG.diasBuenas) delete nodoG.diasBuenas[dia];
             } else {
                 let nodoM = obtenerNodoModelo();
                 if(nodoM.pdDirecto) delete nodoM.pdDirecto[dia];
-                if(nodoM.diasEnsambladas) delete nodoM.diasEnsambladas[dia];
-                if(nodoM.diasBuenas) delete nodoM.diasBuenas[dia];
                 if(nodoM.defectos && nodoM.defectos[dia] !== undefined) delete nodoM.defectos[dia];
             }
 
             if(window.sincronizarConNube) window.sincronizarConNube();
-            document.getElementById('numRevisadasCtrl').value = "";
-            document.getElementById('numBuenasCtrl').value = "";
+            document.getElementById('numPDValCtrl').value = "";
             cargarDatosVista();
             alert(`🗑️ Datos del día ${dia} borrados.`);
         }
@@ -1343,21 +1253,30 @@
                 if(window.modoVistaActual === 'GENERAL') {
                     let nodoG = obtenerNodoGeneral();
                     nodoG.pdDirecto = {};
-                    nodoG.diasEnsambladas = {};
-                    nodoG.diasBuenas = {};
+                    nodoG.acumFijo = null;
                 } else {
                     let nodoM = obtenerNodoModelo();
                     nodoM.pdDirecto = {};
-                    nodoM.diasEnsambladas = {};
-                    nodoM.diasBuenas = {};
                     nodoM.defectos = {};
+                    nodoM.acumFijo = null;
                 }
                 if(window.sincronizarConNube) window.sincronizarConNube();
                 cargarDatosVista();
             }
         }
 
-        /* --- FUNCIONES DE EDICIÓN MANUAL DE TARJETAS --- */
+        /* --- FUNCIONES DE EDICIÓN MANUAL DE TARJETAS Y ACUMULADOS --- */
+
+        function editarAcumuladoModeloManual() {
+            let nodoM = obtenerNodoModelo();
+            let actual = document.getElementById('txtAcumuladoMes').innerText;
+            let val = prompt("Ingresa el % Acumulado del Mes para este Modelo (ej: 77,87%):", actual);
+            if(val !== null) {
+                nodoM.acumFijo = val.trim() === "" ? null : val.trim();
+                if(window.sincronizarConNube) window.sincronizarConNube();
+                cargarDatosVista();
+            }
+        }
 
         function editarTituloAnoAnt() {
             let nodoG = obtenerNodoGeneral();
@@ -1439,7 +1358,7 @@
         function editarAcumuladoGeneralFijo() {
             let nodoG = obtenerNodoGeneral();
             let actual = document.getElementById('valAcumGenVal').innerText;
-            let val = prompt("Ingresa el porcentaje acumulado (ej: 66,21%):", actual);
+            let val = prompt("Ingresa el porcentaje acumulado (ej: 77,87%):", actual);
             if(val !== null) {
                 nodoG.acumFijo = val.trim() === "" ? null : val.trim();
                 if(window.sincronizarConNube) window.sincronizarConNube();
